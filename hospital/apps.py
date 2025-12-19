@@ -4,6 +4,10 @@ import time
 import os
 import sys
 
+class HospitalConfig(AppConfig):
+    default_auto_field = 'django.db.models.BigAutoField'
+    name = 'hospital'
+
 def run_scheduler():
     """Background task to send reminders periodically"""
     from django.core.management import call_command

@@ -43,22 +43,41 @@ class PatientRegistrationForm(forms.ModelForm):
             patient.save()
         return patient
 
+def generate_15_min_slots(start_hour=9, end_hour=17):
+    slots = []
+    for hour in range(start_hour, end_hour):
+        for minute in (0, 15, 30, 45):
+            t = time(hour, minute)
+            slots.append((t, t.strftime('%H:%M')))
+    return slots
 
 class AppointmentForm(forms.ModelForm):
     """Form for creating appointments"""
+    appointment_time = forms.ChoiceField(
+        choices=generate_15_min_slots(),
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+
     class Meta:
         model = Appointment
         fields = ['patient', 'doctor', 'appointment_date', 'appointment_time', 'reason']
         widgets = {
             'appointment_date': forms.DateInput(attrs={'type': 'date'}),
-            'appointment_time': forms.TimeInput(attrs={'type': 'time'}),
+            #'appointment_time': forms.TimeInput(attrs={'type': 'time'}),
             'reason': forms.Textarea(attrs={'rows': 3}),
         }
     
     def __init__(self, *args, **kwargs):
+        slots = kwargs.pop('slots',[])
         super().__init__(*args, **kwargs)
         self.fields['patient'].queryset = Patient.objects.all().order_by('patient_id')
         self.fields['doctor'].queryset = Doctor.objects.all().order_by('user__first_name')
+#--------
+        self.fields['appointment_time'].choices = [(slot,slot)for slot in slots]
+    def clean_appointment_time(self):
+        value = self.cleaned_data['appointment_time']
+        hour,minute = map(int,value.split(':'))
+        return time(hour,minute)
 
 
 class FollowUpAppointmentForm(forms.ModelForm):
