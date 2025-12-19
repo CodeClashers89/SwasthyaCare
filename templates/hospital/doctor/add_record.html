@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+
+{% block title %}Add Medical Record - SwasthyaCare{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Add Medical Record</h1>
+    <p class="page-subtitle">{{ appointment.patient.patient_id }} - {{ appointment.patient.user.get_full_name }}</p>
+</div>
+
+<div class="card">
+    <div class="card-header">Appointment Details</div>
+    <div class="card-body">
+        <ul class="info-list">
+            <li>
+                <span class="info-label">Patient</span>
+                <span class="info-value">{{ appointment.patient.patient_id }} - {{
+                    appointment.patient.user.get_full_name }}</span>
+            </li>
+            <li>
+                <span class="info-label">Date & Time</span>
+                <span class="info-value">{{ appointment.appointment_date }} at {{ appointment.appointment_time|time:"h:i
+                    A" }}</span>
+            </li>
+            <li>
+                <span class="info-label">Reason for Visit</span>
+                <span class="info-value">{{ appointment.reason }}</span>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<div class="card mt-3">
+    <div class="card-header">Medical Record Form</div>
+    <div class="card-body">
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label for="{{ form.diagnosis.id_for_label }}" class="form-label">Diagnosis *</label>
+                {{ form.diagnosis }}
+                {% if form.diagnosis.help_text %}
+                <small class="form-help">{{ form.diagnosis.help_text }}</small>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.prescription.id_for_label }}" class="form-label">Prescription *</label>
+                {{ form.prescription }}
+                {% if form.prescription.help_text %}
+                <small class="form-help">{{ form.prescription.help_text }}</small>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.report_file.id_for_label }}" class="form-label">Report File (Optional)</label>
+                {{ form.report_file }}
+                <small class="form-help">Upload medical reports, test results, or scan images</small>
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.notes.id_for_label }}" class="form-label">Additional Notes</label>
+                {{ form.notes }}
+                {% if form.notes.help_text %}
+                <small class="form-help">{{ form.notes.help_text }}</small>
+                {% endif %}
+            </div>
+
+            <div class="flex-gap mt-3">
+                <button type="submit" class="btn btn-success">Save Medical Record</button>
+                <a href="{% url 'hospital:doctor_appointments' %}" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

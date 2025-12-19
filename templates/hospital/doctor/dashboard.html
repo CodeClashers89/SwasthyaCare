@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+
+{% block title %}Doctor Dashboard - SwasthyaCare{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Welcome, Dr. {{ doctor.user.get_full_name }}</h1>
+    <p class="page-subtitle">{{ doctor.specialization }}</p>
+</div>
+
+<div class="grid grid-3">
+    <div class="stats-card">
+        <div class="stats-number">{{ today_appointments.count }}</div>
+        <div class="stats-label">Today's Appointments</div>
+    </div>
+    <div class="stats-card success">
+        <div class="stats-number">{{ upcoming_appointments.count }}</div>
+        <div class="stats-label">Upcoming Appointments</div>
+    </div>
+    <div class="stats-card warning">
+        <div class="stats-number">{{ doctor.experience_years }}</div>
+        <div class="stats-label">Years of Experience</div>
+    </div>
+</div>
+
+<div class="grid grid-2">
+    <div class="card">
+        <div class="card-header">Today's Appointments</div>
+        <div class="card-body">
+            {% if today_appointments %}
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Patient</th>
+                            <th>Reason</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for appointment in today_appointments %}
+                        <tr>
+                            <td>{{ appointment.appointment_time|time:"h:i A" }}</td>
+                            <td>
+                                <strong>{{ appointment.patient.patient_id }}</strong><br>
+                                {{ appointment.patient.user.get_full_name }}
+                            </td>
+                            <td>{{ appointment.reason|truncatewords:10 }}</td>
+                            <td class="actions">
+                                <a href="{% url 'hospital:patient_history' appointment.patient.id %}"
+                                    class="btn btn-sm btn-primary">View History</a>
+                                <a href="{% url 'hospital:add_medical_record' appointment.id %}"
+                                    class="btn btn-sm btn-success">Add Record</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-state-icon">📅</div>
+                <p class="empty-state-text">No appointments scheduled for today</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">Upcoming Appointments</div>
+        <div class="card-body">
+            {% if upcoming_appointments %}
+            <ul class="info-list">
+                {% for appointment in upcoming_appointments %}
+                <li>
+                    <div>
+                        <strong>{{ appointment.patient.patient_id }}</strong> - {{
+                        appointment.patient.user.get_full_name }}<br>
+                        <small style="color: var(--text-secondary);">{{ appointment.appointment_date }} at {{
+                            appointment.appointment_time|time:"h:i A" }}</small>
+                    </div>
+                    <span class="badge badge-scheduled">{{ appointment.status }}</span>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-state-icon">📋</div>
+                <p class="empty-state-text">No upcoming appointments</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="flex-between mt-3">
+    <a href="{% url 'hospital:doctor_appointments' %}" class="btn btn-primary">View All Appointments</a>
+    <a href="{% url 'hospital:manage_availability' %}" class="btn btn-secondary">Manage Availability</a>
+</div>
+{% endblock %}

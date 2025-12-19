@@ -1,0 +1,150 @@
+{% extends 'base.html' %}
+
+{% block title %}Patient History - SwasthyaCare{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Patient Medical History</h1>
+    <p class="page-subtitle">{{ patient.patient_id }} - {{ patient.user.get_full_name }}</p>
+</div>
+
+<div class="grid grid-2">
+    <div class="card">
+        <div class="card-header">Patient Information</div>
+        <div class="card-body">
+            <ul class="info-list">
+                <li>
+                    <span class="info-label">Patient ID</span>
+                    <span class="info-value">{{ patient.patient_id }}</span>
+                </li>
+                <li>
+                    <span class="info-label">Name</span>
+                    <span class="info-value">{{ patient.user.get_full_name }}</span>
+                </li>
+                <li>
+                    <span class="info-label">Date of Birth</span>
+                    <span class="info-value">{{ patient.date_of_birth }}</span>
+                </li>
+                <li>
+                    <span class="info-label">Gender</span>
+                    <span class="info-value">{{ patient.get_gender_display }}</span>
+                </li>
+                <li>
+                    <span class="info-label">Blood Group</span>
+                    <span class="info-value">{{ patient.blood_group|default:"Not specified" }}</span>
+                </li>
+                <li>
+                    <span class="info-label">Phone</span>
+                    <span class="info-value">{{ patient.user.phone }}</span>
+                </li>
+                <li>
+                    <span class="info-label">Email</span>
+                    <span class="info-value">{{ patient.user.email }}</span>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">Medical Information</div>
+        <div class="card-body">
+            <div class="form-group">
+                <label class="form-label">Allergies</label>
+                <p style="color: var(--text-secondary);">{{ patient.allergies|default:"None reported" }}</p>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Chronic Diseases</label>
+                <p style="color: var(--text-secondary);">{{ patient.chronic_diseases|default:"None reported" }}</p>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Previous Surgeries</label>
+                <p style="color: var(--text-secondary);">{{ patient.previous_surgeries|default:"None reported" }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mt-3">
+    <div class="card-header">Appointment History</div>
+    <div class="card-body">
+        {% if appointments %}
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date & Time</th>
+                        <th>Doctor</th>
+                        <th>Reason</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for appointment in appointments %}
+                    <tr>
+                        <td>
+                            {{ appointment.appointment_date }}<br>
+                            {{ appointment.appointment_time|time:"h:i A" }}
+                        </td>
+                        <td>Dr. {{ appointment.doctor.user.get_full_name }}</td>
+                        <td>{{ appointment.reason }}</td>
+                        <td><span class="badge badge-{{ appointment.status|lower|cut:' '|cut:'_' }}">{{
+                                appointment.get_status_display }}</span></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-state-icon">📋</div>
+            <p class="empty-state-text">No appointment history</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="card mt-3">
+    <div class="card-header">Medical Records</div>
+    <div class="card-body">
+        {% if medical_records %}
+        <div class="timeline">
+            {% for record in medical_records %}
+            <div class="timeline-item">
+                <div class="timeline-content">
+                    <div class="timeline-date">{{ record.created_at|date:"F d, Y - h:i A" }}</div>
+                    <p><strong>Doctor:</strong> Dr. {{ record.doctor.user.get_full_name }}</p>
+                    <div class="form-group">
+                        <label class="form-label">Diagnosis</label>
+                        <p style="color: var(--text-secondary);">{{ record.diagnosis }}</p>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Prescription</label>
+                        <p style="color: var(--text-secondary);">{{ record.prescription }}</p>
+                    </div>
+                    {% if record.notes %}
+                    <div class="form-group">
+                        <label class="form-label">Notes</label>
+                        <p style="color: var(--text-secondary);">{{ record.notes }}</p>
+                    </div>
+                    {% endif %}
+                    {% if record.report_file %}
+                    <a href="{{ record.report_file.url }}" class="btn btn-sm btn-primary" target="_blank">View
+                        Report</a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-state-icon">📄</div>
+            <p class="empty-state-text">No medical records</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="mt-3">
+    <a href="{% url 'hospital:doctor_appointments' %}" class="btn btn-secondary">Back to Appointments</a>
+</div>
+{% endblock %}

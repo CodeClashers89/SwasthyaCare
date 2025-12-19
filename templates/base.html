@@ -1,0 +1,55 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}SwasthyaCare Hospital{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    {% if user.is_authenticated %}
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="{% url 'hospital:home' %}" class="navbar-brand">
+                🏥 SwasthyaCare
+            </a>
+            
+            <ul class="navbar-menu">
+                {% if user.role == 'DOCTOR' %}
+                    <li><a href="{% url 'hospital:doctor_dashboard' %}">Dashboard</a></li>
+                    <li><a href="{% url 'hospital:doctor_appointments' %}">Appointments</a></li>
+                    <li><a href="{% url 'hospital:manage_availability' %}">Availability</a></li>
+                {% elif user.role == 'RECEPTIONIST' %}
+                    <li><a href="{% url 'hospital:receptionist_dashboard' %}">Dashboard</a></li>
+                    <li><a href="{% url 'hospital:register_patient' %}">Register Patient</a></li>
+                    <li><a href="{% url 'hospital:create_appointment' %}">New Appointment</a></li>
+                    <li><a href="{% url 'hospital:receptionist_appointments' %}">All Appointments</a></li>
+                {% elif user.role == 'PATIENT' %}
+                    <li><a href="{% url 'hospital:patient_dashboard' %}">Dashboard</a></li>
+                    <li><a href="{% url 'hospital:check_doctor_availability' %}">Doctor Availability</a></li>
+                {% endif %}
+            </ul>
+            
+            <div class="navbar-user">
+                <span class="user-badge">{{ user.get_full_name }} ({{ user.get_role_display }})</span>
+                <a href="{% url 'hospital:logout' %}" class="btn btn-sm btn-danger">Logout</a>
+            </div>
+        </div>
+    </nav>
+    {% endif %}
+    
+    <div class="container">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{% if message.tags == 'error' %}error{% elif message.tags == 'success' %}success{% elif message.tags == 'warning' %}warning{% else %}info{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+        
+        {% block content %}
+        {% endblock %}
+    </div>
+</body>
+</html>

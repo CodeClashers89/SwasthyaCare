@@ -1,0 +1,140 @@
+{% extends 'base.html' %}
+
+{% block title %}Register Patient - SwasthyaCare{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Register New Patient</h1>
+    <p class="page-subtitle">Create a new patient profile with medical information</p>
+</div>
+
+<div class="card">
+    <div class="card-header">Patient Registration Form</div>
+    <div class="card-body">
+        <form method="post">
+            {% csrf_token %}
+
+            <h3 style="margin-bottom: 1rem; color: var(--primary-color);">Account Information</h3>
+
+            <div class="grid grid-2">
+                <div class="form-group">
+                    <label for="{{ form.first_name.id_for_label }}" class="form-label">First Name *</label>
+                    {{ form.first_name }}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.last_name.id_for_label }}" class="form-label">Last Name *</label>
+                    {{ form.last_name }}
+                </div>
+            </div>
+
+            <div class="grid grid-2">
+                <div class="form-group">
+                    <label for="{{ form.username.id_for_label }}" class="form-label">Username *</label>
+                    {{ form.username }}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.email.id_for_label }}" class="form-label">Email *</label>
+                    {{ form.email }}
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.password.id_for_label }}" class="form-label">Password *</label>
+                {{ form.password }}
+            </div>
+
+            <hr style="margin: 2rem 0; border: none; border-top: 2px solid var(--border-color);">
+
+            <h3 style="margin-bottom: 1rem; color: var(--primary-color);">Personal Information</h3>
+
+            <div class="grid grid-2">
+                <div class="form-group">
+                    <label for="{{ form.date_of_birth.id_for_label }}" class="form-label">Date of Birth *</label>
+                    {{ form.date_of_birth }}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.gender.id_for_label }}" class="form-label">Gender *</label>
+                    {{ form.gender }}
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.address.id_for_label }}" class="form-label">Address *</label>
+                {{ form.address }}
+            </div>
+
+            <hr style="margin: 2rem 0; border: none; border-top: 2px solid var(--border-color);">
+
+            <h3 style="margin-bottom: 1rem; color: var(--primary-color);">Medical Information</h3>
+
+            <div class="form-group">
+                <label for="{{ form.blood_group.id_for_label }}" class="form-label">Blood Group</label>
+                {{ form.blood_group }}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.allergies.id_for_label }}" class="form-label">Allergies</label>
+                {{ form.allergies }}
+                {% if form.allergies.help_text %}
+                <small class="form-help">{{ form.allergies.help_text }}</small>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.chronic_diseases.id_for_label }}" class="form-label">Chronic Diseases</label>
+                {{ form.chronic_diseases }}
+                {% if form.chronic_diseases.help_text %}
+                <small class="form-help">{{ form.chronic_diseases.help_text }}</small>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.previous_surgeries.id_for_label }}" class="form-label">Previous Surgeries</label>
+                {{ form.previous_surgeries }}
+                {% if form.previous_surgeries.help_text %}
+                <small class="form-help">{{ form.previous_surgeries.help_text }}</small>
+                {% endif %}
+            </div>
+
+            <hr style="margin: 2rem 0; border: none; border-top: 2px solid var(--border-color);">
+
+            <h3 style="margin-bottom: 1rem; color: var(--primary-color);">Emergency Contact</h3>
+
+            <div class="grid grid-2">
+                <div class="form-group">
+                    <label for="{{ form.emergency_contact_name.id_for_label }}" class="form-label">Emergency Contact
+                        Name *</label>
+                    {{ form.emergency_contact_name }}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.emergency_contact_phone.id_for_label }}" class="form-label">Emergency Contact
+                        Phone *</label>
+                    {{ form.emergency_contact_phone }}
+                </div>
+            </div>
+
+            {% if form.errors %}
+            <div class="alert alert-error">
+                <strong>Please correct the following errors:</strong>
+                <ul style="margin: 0.5rem 0 0 1.5rem;">
+                    {% for field, errors in form.errors.items %}
+                    {% for error in errors %}
+                    <li>{{ field }}: {{ error }}</li>
+                    {% endfor %}
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+
+            <div class="flex-gap mt-3">
+                <button type="submit" class="btn btn-success btn-lg">Register Patient</button>
+                <a href="{% url 'hospital:receptionist_dashboard' %}" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

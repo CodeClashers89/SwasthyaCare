@@ -1,0 +1,146 @@
+{% extends 'base.html' %}
+
+{% block title %}Doctor Availability - SwasthyaCare{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Check Doctor Availability</h1>
+    <p class="page-subtitle">View doctor schedules and availability</p>
+</div>
+
+<div class="card">
+    <div class="card-header">Search Availability</div>
+    <div class="card-body">
+        <form method="get">
+            <div class="grid grid-2">
+                <div class="form-group">
+                    <label for="doctor" class="form-label">Select Doctor *</label>
+                    <select name="doctor" id="doctor" class="form-control" required>
+                        <option value="">-- Select a doctor --</option>
+                        {% for doctor in doctors %}
+                        <option value="{{ doctor.id }}" {% if selected_doctor_id==doctor.id|stringformat:"s"
+                            %}selected{% endif %}>
+                            Dr. {{ doctor.user.get_full_name }} - {{ doctor.specialization }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="date" class="form-label">Select Date *</label>
+                    <input type="date" name="date" id="date" value="{{ selected_date }}" class="form-control" required>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Check Availability</button>
+        </form>
+    </div>
+</div>
+
+{% if availability_info %}
+<div class="card mt-3">
+    <div class="card-header">
+        Availability for Dr. {{ availability_info.doctor.user.get_full_name }} on {{ availability_info.date }}
+    </div>
+    <div class="card-body">
+        <div class="grid grid-2">
+            <div class="card" style="background: var(--bg-color);">
+                <div class="card-header" style="background: transparent; border-bottom: 1px solid var(--border-color);">
+                    Doctor Information
+                </div>
+                <div class="card-body">
+                    <ul class="info-list">
+                        <li>
+                            <span class="info-label">Name</span>
+                            <span class="info-value">Dr. {{ availability_info.doctor.user.get_full_name }}</span>
+                        </li>
+                        <li>
+                            <span class="info-label">Specialization</span>
+                            <span class="info-value">{{ availability_info.doctor.specialization }}</span>
+                        </li>
+                        <li>
+                            <span class="info-label">Qualification</span>
+                            <span class="info-value">{{ availability_info.doctor.qualification }}</span>
+                        </li>
+                        <li>
+                            <span class="info-label">Experience</span>
+                            <span class="info-value">{{ availability_info.doctor.experience_years }} years</span>
+                        </li>
+                        <li>
+                            <span class="info-label">Consultation Fee</span>
+                            <span class="info-value">₹{{ availability_info.doctor.consultation_fee }}</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div>
+                {% if availability_info.unavailable_times %}
+                <div class="card" style="background: #fef3c7; border-color: var(--warning-color);">
+                    <div class="card-header"
+                        style="background: transparent; border-bottom: 1px solid var(--warning-color); color: #92400e;">
+                        ⚠️ Unavailable Times
+                    </div>
+                    <div class="card-body">
+                        <ul style="list-style: none; padding: 0; margin: 0;">
+                            {% for unavailable in availability_info.unavailable_times %}
+                            <li style="padding: 0.5rem 0; border-bottom: 1px solid rgba(146, 64, 14, 0.2);">
+                                <strong>{{ unavailable.start_time|time:"h:i A" }} - {{ unavailable.end_time|time:"h:i A"
+                                    }}</strong>
+                                <br>
+                                <span class="badge badge-{{ unavailable.availability_type|lower }}">
+                                    {{ unavailable.get_availability_type_display }}
+                                </span>
+                                {% if unavailable.reason %}
+                                <br><small style="color: #92400e;">{{ unavailable.reason }}</small>
+                                {% endif %}
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+                {% else %}
+                <div class="alert alert-success">
+                    <strong>✓ No unavailable periods</strong><br>
+                    Doctor has no lunch breaks or unavailable times marked for this date.
+                </div>
+                {% endif %}
+
+                {% if availability_info.booked_appointments %}
+                <div class="card mt-2" style="background: #dbeafe; border-color: var(--primary-color);">
+                    <div class="card-header"
+                        style="background: transparent; border-bottom: 1px solid var(--primary-color); color: #1e40af;">
+                        📅 Booked Appointments
+                    </div>
+                    <div class="card-body">
+                        <ul style="list-style: none; padding: 0; margin: 0;">
+                            {% for appointment in availability_info.booked_appointments %}
+                            <li style="padding: 0.5rem 0; border-bottom: 1px solid rgba(30, 64, 175, 0.2);">
+                                <strong>{{ appointment.appointment_time|time:"h:i A" }}</strong>
+                                <span class="badge badge-scheduled">Booked</span>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+                {% else %}
+                <div class="alert alert-info mt-2">
+                    <strong>ℹ️ No appointments booked</strong><br>
+                    No appointments are currently scheduled for this date.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="alert alert-info mt-3">
+            <strong>Note:</strong> To book an appointment, please contact the receptionist at the hospital reception
+            desk or call the hospital.
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<div class="mt-3">
+    <a href="{% url 'hospital:patient_dashboard' %}" class="btn btn-secondary">Back to Dashboard</a>
+</div>
+{% endblock %}

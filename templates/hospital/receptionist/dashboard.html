@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+
+{% block title %}Receptionist Dashboard - SwasthyaCare{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Welcome, {{ user.get_full_name }}</h1>
+    <p class="page-subtitle">Receptionist Dashboard</p>
+</div>
+
+<div class="grid grid-4">
+    <div class="stats-card">
+        <div class="stats-number">{{ today_appointments.count }}</div>
+        <div class="stats-label">Today's Appointments</div>
+    </div>
+    <div class="stats-card success">
+        <div class="stats-number">{{ recent_patients.count }}</div>
+        <div class="stats-label">Recent Patients</div>
+    </div>
+    <div class="stats-card warning">
+        <a href="{% url 'hospital:register_patient' %}" class="btn btn-lg"
+            style="background: white; color: var(--warning-color); width: 100%;">
+            Register Patient
+        </a>
+    </div>
+    <div class="stats-card danger">
+        <a href="{% url 'hospital:create_appointment' %}" class="btn btn-lg"
+            style="background: white; color: var(--danger-color); width: 100%;">
+            New Appointment
+        </a>
+    </div>
+</div>
+
+<div class="grid grid-2">
+    <div class="card">
+        <div class="card-header">Today's Appointments</div>
+        <div class="card-body">
+            {% if today_appointments %}
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Patient</th>
+                            <th>Doctor</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for appointment in today_appointments %}
+                        <tr>
+                            <td>{{ appointment.appointment_time|time:"h:i A" }}</td>
+                            <td>
+                                <strong>{{ appointment.patient.patient_id }}</strong><br>
+                                {{ appointment.patient.user.get_full_name }}
+                            </td>
+                            <td>Dr. {{ appointment.doctor.user.get_full_name }}</td>
+                            <td><span class="badge badge-{{ appointment.status|lower|cut:' '|cut:'_' }}">{{
+                                    appointment.get_status_display }}</span></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-state-icon">📅</div>
+                <p class="empty-state-text">No appointments for today</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">Recently Registered Patients</div>
+        <div class="card-body">
+            {% if recent_patients %}
+            <ul class="info-list">
+                {% for patient in recent_patients %}
+                <li>
+                    <div>
+                        <strong>{{ patient.patient_id }}</strong> - {{ patient.user.get_full_name }}<br>
+                        <small style="color: var(--text-secondary);">{{ patient.user.phone }} | {{ patient.user.email
+                            }}</small>
+                    </div>
+                    <span class="badge badge-patient">{{ patient.get_gender_display }}</span>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-state-icon">👥</div>
+                <p class="empty-state-text">No recent patients</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="flex-gap mt-3">
+    <a href="{% url 'hospital:receptionist_appointments' %}" class="btn btn-primary">View All Appointments</a>
+    <a href="{% url 'hospital:register_patient' %}" class="btn btn-success">Register New Patient</a>
+    <a href="{% url 'hospital:create_appointment' %}" class="btn btn-warning">Create Appointment</a>
+</div>
+{% endblock %}
