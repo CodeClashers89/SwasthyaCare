@@ -119,6 +119,7 @@ def doctor_appointments(request):
     context = {
         'appointments': appointments,
         'status_filter': status_filter,
+        'doctor': doctor,
     }
     return render(request, 'hospital/doctor/appointments.html', context)
 
