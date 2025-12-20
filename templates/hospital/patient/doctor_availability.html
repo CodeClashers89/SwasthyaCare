@@ -27,13 +27,45 @@
             height: 80px;
             display: flex;
             align-items: center;
+            justify-content: space-between;
             padding: 0 50px;
             color: white;
         }
 
         .navbar-brand {
-            font-size: 32px;
+            font-size: 28px;
+            font-weight: 600;
+        }
+
+        .navbar-center {
+            display: flex;
+            gap: 40px;
+        }
+
+        .navbar-center a {
+            color: white;
+            text-decoration: none;
             font-weight: 500;
+            opacity: 0.9;
+        }
+
+        .navbar-center a:hover {
+            opacity: 1;
+        }
+
+        .navbar-right {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .btn-logout {
+            background-color: #ef4444;
+            padding: 8px 18px;
+            border-radius: 8px;
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
         }
 
         /* MAIN CONTENT */
@@ -185,10 +217,17 @@
 <body>
 
 <!-- NAVBAR -->
-<div class="navbar">
-    <div class="navbar-brand">Swasthya Care</div>
-</div>
-
+<nav class="navbar">
+        <div class="navbar-brand">SwasthyaCare</div>
+        <div class="navbar-center">
+            <a href="{% url 'hospital:patient_dashboard' %}">Dashboard</a>
+            <a href="{% url 'hospital:check_doctor_availability' %}">Doctor Availability</a>
+        </div>
+        <div class="navbar-right">
+            <span>{{ patient.user.get_full_name }}</span>
+            <a href="{% url 'hospital:logout' %}" class="btn-logout">Logout</a>
+        </div>
+    </nav>
 <!-- MAIN -->
 <div class="main-content">
 
