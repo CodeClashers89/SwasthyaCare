@@ -1,100 +1,238 @@
-{% extends 'base.html' %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>All Appointments - SwasthyaCare</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-{% block title %}All Appointments - SwasthyaCare{% endblock %}
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-{% block content %}
-<div class="page-header">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{
+            font-family:'Poppins','Inter',sans-serif;
+            background:rgba(211,255,240,0.53);
+            min-height:100vh;
+        }
+
+        /* NAVBAR */
+        .navbar{
+            background:#64cbab;
+            height:80px;
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            padding:0 50px;
+            color:#fff;
+        }
+        .navbar-brand{font-size:28px;font-weight:600}
+        .navbar-center{display:flex;gap:40px}
+        .navbar-center a{color:white;text-decoration:none;font-weight:500}
+        .navbar-right{display:flex;gap:15px;align-items:center}
+        .btn-logout{
+            background:#ef4444;
+            padding:8px 18px;
+            border-radius:8px;
+            color:white;
+            text-decoration:none;
+            font-weight:600;
+        }
+
+        /* MAIN */
+        .main-content{
+            padding:40px 50px;
+            max-width:1600px;
+            margin:auto;
+        }
+
+        .page-title{font-size:32px;font-weight:700}
+        .page-subtitle{font-size:14px;color:#666;margin-bottom:25px}
+
+        /* FILTER CARD */
+        .filter-card{
+            background:white;
+            border-radius:12px;
+            padding:25px;
+            margin-bottom:25px;
+            box-shadow:0 2px 8px rgba(0,0,0,0.08);
+        }
+        .filter-controls{
+            display:flex;
+            gap:15px;
+            align-items:flex-end;
+            flex-wrap:wrap;
+        }
+        .filter-group{flex:1}
+        .filter-label{font-size:13px;font-weight:600;margin-bottom:6px;display:block}
+        .filter-input,.filter-select{
+            width:100%;
+            padding:10px;
+            border:1px solid #ccc;
+            border-radius:8px;
+        }
+
+        .btn-filter{
+            padding:10px 24px;
+            border-radius:8px;
+            border:none;
+            font-weight:600;
+            cursor:pointer;
+        }
+        .btn-primary{background:#4285f4;color:white}
+        .btn-secondary{background:#6b7280;color:white}
+
+        /* TABLE */
+        .appointments-card{
+            background:white;
+            border-radius:12px;
+            overflow:hidden;
+            box-shadow:0 2px 8px rgba(0,0,0,0.08);
+        }
+        table{width:100%;border-collapse:collapse}
+        thead{background:#4285f4;color:white}
+        th,td{padding:14px;font-size:13px;text-align:left}
+        tbody tr:hover{background:#f9f9f9}
+
+        .status-badge{
+            padding:4px 10px;
+            border-radius:12px;
+            font-size:10px;
+            font-weight:600;
+            text-transform:uppercase;
+            display:inline-block;
+        }
+        .status-scheduled{background:#dbeafe;color:#1e40af}
+        .status-completed{background:#d1fae5;color:#065f46}
+        .status-cancelled{background:#fee2e2;color:#991b1b}
+        .status-followup{background:#e0e7ff;color:#3730a3}
+
+        .action-buttons{display:flex;gap:8px}
+        .btn-action{
+            padding:6px 14px;
+            border-radius:6px;
+            font-size:12px;
+            font-weight:600;
+            color:white;
+            text-decoration:none;
+        }
+        .btn-warning{background:#f59e0b}
+        .btn-danger{background:#ef4444}
+
+        .no-actions{font-size:12px;color:#9ca3af}
+
+        /* FOOTER ACTIONS */
+        .footer-actions{margin-top:25px;display:flex;gap:15px;flex-wrap:wrap}
+        .btn-success{background:#10b981}
+    </style>
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+    <div class="navbar-brand">SwasthyaCare</div>
+    <div class="navbar-center">
+        <a href="{% url 'hospital:receptionist_dashboard' %}">Dashboard</a>
+        <a href="{% url 'hospital:register_patient' %}">Register Patient</a>
+        <a href="{% url 'hospital:create_appointment' %}">New Appointment</a>
+        <a href="{% url 'hospital:receptionist_appointments' %}">All Appointments</a>
+    </div>
+    <div class="navbar-right">
+        {{ user.get_full_name }}
+        <a href="{% url 'hospital:logout' %}" class="btn-logout">Logout</a>
+    </div>
+</nav>
+
+<div class="main-content">
+
+    <!-- HEADER -->
     <h1 class="page-title">All Appointments</h1>
     <p class="page-subtitle">Manage hospital appointments</p>
-</div>
 
-<div class="card">
-    <div class="card-header flex-between">
-        <span>Filter Appointments</span>
-        <div class="flex-gap">
-            <form method="get" style="display: flex; gap: 0.5rem; align-items: center;">
-                <input type="date" name="date" value="{{ date_filter }}" class="form-control" style="width: auto;">
-                <select name="status" class="form-control" style="width: auto;">
-                    <option value="all" {% if status_filter == 'all' %}selected{% endif %}>All Status</option>
+    <!-- FILTER -->
+    <form method="get" class="filter-card">
+        <div class="filter-controls">
+            <div class="filter-group">
+                <label class="filter-label">Date</label>
+                <input type="date" name="date" value="{{ date_filter }}" class="filter-input">
+            </div>
+
+            <div class="filter-group">
+                <label class="filter-label">Status</label>
+                <select name="status" class="filter-select">
+                    <option value="all">All</option>
                     <option value="scheduled" {% if status_filter == 'scheduled' %}selected{% endif %}>Scheduled</option>
                     <option value="completed" {% if status_filter == 'completed' %}selected{% endif %}>Completed</option>
                     <option value="cancelled" {% if status_filter == 'cancelled' %}selected{% endif %}>Cancelled</option>
                     <option value="no_show" {% if status_filter == 'no_show' %}selected{% endif %}>No Show</option>
                 </select>
-                <button type="submit" class="btn btn-sm btn-primary">Filter</button>
-                <a href="{% url 'hospital:receptionist_appointments' %}" class="btn btn-sm btn-secondary">Clear</a>
-            </form>
+            </div>
+
+            <button class="btn-action btn-primary">Filter</button>
+            <a href="{% url 'hospital:receptionist_appointments' %}" class="btn-action btn-secondary">Clear</a>
         </div>
-    </div>
-    <div class="card-body">
+    </form>
+
+    <!-- TABLE -->
+    <div class="appointments-card">
         {% if appointments %}
-        <div class="table-container">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Date & Time</th>
-                        <th>Patient</th>
-                        <th>Doctor</th>
-                        <th>Reason</th>
-                        <th>Status</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for appointment in appointments %}
-                    <tr>
-                        <td>
-                            <strong>{{ appointment.appointment_date }}</strong><br>
-                            {{ appointment.appointment_time|time:"h:i A" }}
-                        </td>
-                        <td>
-                            <strong>{{ appointment.patient.patient_id }}</strong><br>
-                            {{ appointment.patient.user.get_full_name }}<br>
-                            <small style="color: var(--text-secondary);">{{ appointment.patient.user.phone }}</small>
-                        </td>
-                        <td>
-                            Dr. {{ appointment.doctor.user.get_full_name }}<br>
-                            <small style="color: var(--text-secondary);">{{ appointment.doctor.specialization }}</small>
-                        </td>
-                        <td>{{ appointment.reason|truncatewords:10 }}</td>
-                        <td>
-                            <span class="badge badge-{{ appointment.status|lower|cut:' '|cut:'_' }}">
-                                {{ appointment.get_status_display }}
-                            </span>
-                            {% if appointment.is_follow_up %}
-                            <br><span class="badge badge-doctor">Follow-up</span>
-                            {% endif %}
-                        </td>
-                        <td class="actions">
-                            {% if appointment.status == 'SCHEDULED' %}
-                            <a href="{% url 'hospital:reschedule_appointment' appointment.id %}"
-                                class="btn btn-sm btn-warning">Reschedule</a>
-                            <a href="{% url 'hospital:cancel_appointment' appointment.id %}"
-                                class="btn btn-sm btn-danger"
-                                onclick="return confirm('Are you sure you want to cancel this appointment?')">
-                                Cancel
-                            </a>
-                            {% else %}
-                            <span style="color: var(--text-secondary); font-size: 0.75rem;">No actions</span>
-                            {% endif %}
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Date & Time</th>
+                    <th>Patient</th>
+                    <th>Doctor</th>
+                    <th>Reason</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for appointment in appointments %}
+                <tr>
+                    <td>
+                        <strong>{{ appointment.appointment_date }}</strong><br>
+                        {{ appointment.appointment_time|time:"h:i A" }}
+                    </td>
+                    <td>
+                        <strong>{{ appointment.patient.patient_id }}</strong><br>
+                        {{ appointment.patient.user.get_full_name }}<br>
+                        <small>{{ appointment.patient.user.phone }}</small>
+                    </td>
+                    <td>
+                        Dr. {{ appointment.doctor.user.get_full_name }}<br>
+                        <small>{{ appointment.doctor.specialization }}</small>
+                    </td>
+                    <td>{{ appointment.reason|truncatewords:10 }}</td>
+                    <td>
+                        <span class="status-badge status-{{ appointment.status|lower|cut:'_' }}">
+                            {{ appointment.get_status_display }}
+                        </span>
+                        {% if appointment.is_follow_up %}
+                            <br><span class="status-badge status-followup">Follow-up</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if appointment.status == 'SCHEDULED' %}
+                        <div class="action-buttons">
+                            <a href="{% url 'hospital:reschedule_appointment' appointment.id %}" class="btn-action btn-warning">Reschedule</a>
+                            <a href="{% url 'hospital:cancel_appointment' appointment.id %}" class="btn-action btn-danger"
+                               onclick="return confirm('Cancel this appointment?')">Cancel</a>
+                        </div>
+                        {% else %}
+                            <span class="no-actions">No actions</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
         {% else %}
-        <div class="empty-state">
-            <div class="empty-state-icon">📋</div>
-            <p class="empty-state-text">No appointments found</p>
-            <a href="{% url 'hospital:create_appointment' %}" class="btn btn-primary mt-2">Create New Appointment</a>
-        </div>
+            <p style="padding:25px;">No appointments found.</p>
         {% endif %}
     </div>
-</div>
 
-<div class="mt-3">
-    <a href="{% url 'hospital:create_appointment' %}" class="btn btn-success">Create New Appointment</a>
-    <a href="{% url 'hospital:receptionist_dashboard' %}" class="btn btn-secondary">Back to Dashboard</a>
+
 </div>
-{% endblock %}
+</body>
+</html>
