@@ -1,93 +1,311 @@
-{% extends 'base.html' %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Bulk Reschedule Appointments | SwasthyaCare</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-{% block title %}Reschedule Appointments - SwasthyaCare{% endblock %}
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
 
-{% block content %}
-<div class="page-header">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: rgba(211, 255, 240, 0.53);
+            color: #333;
+        }
+
+        /* NAVBAR */
+        .navbar {
+            background-color: #64cbab;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 50px;
+            color: white;
+        }
+
+        .navbar-brand {
+            font-size: 28px;
+            font-weight: 600;
+        }
+
+        .navbar-center {
+            display: flex;
+            gap: 40px;
+        }
+
+        .navbar-center a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            opacity: 0.9;
+        }
+
+        .navbar-center a:hover {
+            opacity: 1;
+        }
+
+        .navbar-right {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        /* MAIN */
+        .container {
+            width: 80%;
+            margin: 40px auto;
+        }
+
+        .page-title {
+            font-size: 26px;
+            font-weight: 600;
+            color: #5ac6a2;
+            margin-bottom: 5px;
+        }
+
+        .page-subtitle {
+            font-size: 14px;
+            color: #555;
+            margin-bottom: 25px;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+            margin-bottom: 25px;
+        }
+
+        .card-header {
+            font-size: 18px;
+            font-weight: 600;
+            color: #5ac6a2;
+            margin-bottom: 15px;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            background: rgba(211,255,240,0.5);
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .label {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .value {
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        /* TABLE */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: #4285f4;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-size: 13px;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+            font-size: 13px;
+        }
+
+        input[type="date"],
+        input[type="time"] {
+            padding: 6px 8px;
+            width: 100%;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .error-message {
+            font-size: 11px;
+            color: red;
+            margin-top: 4px;
+        }
+
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            margin-top: 15px;
+        }
+
+        /* BUTTONS */
+        .button-group {
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .btn {
+            padding: 10px 25px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .btn-secondary {
+            background: #9e9e9e;
+            color: white;
+        }
+
+        .btn-primary {
+            background: #4285f4;
+            color: white;
+        }
+
+        @media(max-width: 900px) {
+            .container {
+                width: 95%;
+            }
+            .grid-3 {
+                grid-template-columns: 1fr;
+            }
+            .button-group {
+                flex-direction: column;
+            }
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+        <div class="navbar-brand">SwasthyaCare</div>
+    </nav>
+
+<div class="container">
+
+    <!-- PAGE HEADER -->
     <h1 class="page-title">Reschedule Conflicting Appointments</h1>
-    <p class="page-subtitle">Select new times for appointments conflicting with the surgery</p>
-</div>
+    <p class="page-subtitle">
+        The following appointments conflict with the surgery schedule.
+    </p>
 
-<div class="card mb-3">
-    <div class="card-header">Surgery Information</div>
-    <div class="card-body">
-        <div class="grid grid-3">
-            <div class="info-item">
-                <span class="info-label">Surgery Type:</span>
-                <span class="info-value"><strong>{{ surgery.surgery_type }}</strong></span>
-            </div>
-            <div class="info-item">
-                <span class="info-label">Date:</span>
-                <span class="info-value">{{ surgery.surgery_date }}</span>
-            </div>
-            <div class="info-item">
-                <span class="info-label">Time:</span>
-                <span class="info-value">{{ surgery.start_time|time:"h:i A" }} - {{ surgery.end_time|time:"h:i A" }}</span>
-
-
-            </div>
-        </div>
-    </div>
-</div>
-
-<form method="post">
-    {% csrf_token %}
-
+    <!-- SURGERY INFO -->
     <div class="card">
-        <div class="card-header">Appointments to Reschedule ({{ forms|length }})</div>
-        <div class="card-body">
-            <div class="table-container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Patient</th>
-                            <th>Original Date & Time</th>
-                            <th>Reason</th>
-                            <th>New Date</th>
-                            <th>New Time</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for item in forms %}
-                        <tr>
-                            <td>
-                                <strong>{{ item.appointment.patient.patient_id }}</strong><br>
-                                {{ item.appointment.patient.user.get_full_name }}
-                            </td>
-                            <td>
-                                {{ item.appointment.appointment_date }}<br>
-                                <small style="color: var(--text-secondary);">
-                                    {{ item.appointment.appointment_time|time:"h:i A" }}
-                                </small>
-                            </td>
-                            <td>{{ item.appointment.reason|truncatewords:8 }}</td>
-                            <td>
-                                {{ item.form.new_date }}
-                                {% if item.form.new_date.errors %}
-                                <div class="error-message">{{ item.form.new_date.errors }}</div>
-                                {% endif %}
-                            </td>
-                            <td>
-                                {{ item.form.new_time }}
-                                {% if item.form.new_time.errors %}
-                                <div class="error-message">{{ item.form.new_time.errors }}</div>
-                                {% endif %}
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+        <div class="card-header">Surgery Information</div>
+        <div class="grid-3">
+            <div>
+                <div class="label">Surgery Type</div>
+                <div class="value">{{ surgery.surgery_type }}</div>
             </div>
-
-            <div class="alert alert-info mt-3">
-                <strong>ℹ️ Note:</strong> Patients will be automatically notified about the rescheduled appointments.
+            <div>
+                <div class="label">Date</div>
+                <div class="value">{{ surgery.surgery_date }}</div>
+            </div>
+            <div>
+                <div class="label">Time</div>
+                <div class="value">
+                    {{ surgery.start_time|time:"h:i A" }} –
+                    {{ surgery.end_time|time:"h:i A" }}
+                </div>
             </div>
         </div>
     </div>
 
-    <div class="flex-between mt-3">
-        <a href="{% url 'hospital:doctor_dashboard' %}" class="btn btn-secondary">Cancel</a>
-        <button type="submit" class="btn btn-primary">Reschedule All Appointments</button>
-    </div>
-</form>
-{% endblock %}
+    <!-- FORM -->
+    <form method="post">
+        {% csrf_token %}
+
+        <div class="card">
+            <div class="card-header">
+                Appointments to Reschedule ({{ forms|length }})
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Patient</th>
+                        <th>Original Date & Time</th>
+                        <th>Reason</th>
+                        <th>New Date</th>
+                        <th>New Time</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in forms %}
+                    <tr>
+                        <td>
+                            <strong>{{ item.appointment.patient.patient_id }}</strong><br>
+                            {{ item.appointment.patient.user.get_full_name }}
+                        </td>
+                        <td>
+                            {{ item.appointment.appointment_date }}<br>
+                            <small>{{ item.appointment.appointment_time|time:"h:i A" }}</small>
+                        </td>
+                        <td>
+                            {{ item.appointment.reason|truncatewords:8 }}
+                        </td>
+                        <td>
+                            {{ item.form.new_date }}
+                            {% if item.form.new_date.errors %}
+                            <div class="error-message">
+                                {{ item.form.new_date.errors }}
+                            </div>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {{ item.form.new_time }}
+                            {% if item.form.new_time.errors %}
+                            <div class="error-message">
+                                {{ item.form.new_time.errors }}
+                            </div>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <div class="info-box">
+                ℹ️ Patients will be automatically notified after rescheduling.
+            </div>
+
+            <div class="button-group">
+                <a href="{% url 'hospital:doctor_dashboard' %}" class="btn btn-secondary">
+                    Cancel
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    Reschedule All Appointments
+                </button>
+            </div>
+        </div>
+    </form>
+
+</div>
+
+</body>
+</html>
