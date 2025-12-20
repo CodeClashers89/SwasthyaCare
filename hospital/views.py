@@ -918,6 +918,7 @@ def view_surgeries(request):
     ).order_by('-surgery_date', '-start_time')[:10]
     
     context = {
+        'doctor': doctor,
         'upcoming_surgeries': upcoming_surgeries,
         'past_surgeries': past_surgeries,
     }

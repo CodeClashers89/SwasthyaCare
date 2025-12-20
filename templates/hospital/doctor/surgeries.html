@@ -1,105 +1,403 @@
-{% extends 'base.html' %}
+<!DOCTYPE html>
+<html lang="en">
 
-{% block title %}My Surgeries - SwasthyaCare{% endblock %}
+<head>
+    <meta charset="UTF-8">
+    <title>My Surgeries - SwasthyaCare</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-{% block content %}
-<div class="page-header">
-    <h1 class="page-title">My Surgeries</h1>
-    <p class="page-subtitle">View all scheduled surgeries</p>
-</div>
+    <!-- Google Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap"
+        rel="stylesheet">
 
-<div class="card mb-3">
-    <div class="card-header">Upcoming Surgeries</div>
-    <div class="card-body">
-        {% if upcoming_surgeries %}
-        <div class="table-container">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Surgery Type</th>
-                        <th>Patient</th>
-                        <th>Date</th>
-                        <th>Time</th>
-                        <th>Status</th>
-                        <th>Notes</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for surgery in upcoming_surgeries %}
-                    <tr>
-                        <td><strong>{{ surgery.surgery_type }}</strong></td>
-                        <td>{{ surgery.patient_name }}</td>
-                        <td>{{ surgery.surgery_date }}</td>
-                        <td>
-                            {{ surgery.start_time|time:"h:i A" }} - {{ surgery.end_time|time:"h:i A" }}
-                        </td>
-                        <td>
-                            {% if surgery.status == 'APPROVED' %}
-                            <span class="badge badge-success">{{ surgery.get_status_display }}</span>
-                            {% elif surgery.status == 'PENDING' %}
-                            <span class="badge badge-warning">{{ surgery.get_status_display }}</span>
-                            {% else %}
-                            <span class="badge badge-{{ surgery.status|lower }}">{{ surgery.get_status_display }}</span>
-                            {% endif %}
-                        </td>
-                        <td>{{ surgery.notes|truncatewords:10|default:"-" }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', 'Inter', sans-serif;
+            background-color: rgba(211, 255, 240, 0.53);
+            color: #1a1a1a;
+            min-height: 100vh;
+        }
+
+        /* ---------------- NAVBAR ---------------- */
+        .navbar {
+            background-color: #64cbab;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 50px;
+            color: white;
+        }
+
+        .navbar-brand {
+            font-size: 28px;
+            font-weight: 600;
+        }
+
+        .navbar-center {
+            display: flex;
+            gap: 40px;
+        }
+
+        .navbar-center a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            opacity: 0.9;
+        }
+
+        .navbar-center a:hover {
+            opacity: 1;
+        }
+
+        .navbar-right {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .btn-logout {
+            background-color: #ef4444;
+            padding: 8px 18px;
+            border-radius: 8px;
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .btn-logout:hover {
+            background-color: #dc2626;
+        }
+
+        /* ---------------- MAIN CONTENT ---------------- */
+        .main-content {
+            margin-top: 0;
+            padding: 40px 50px;
+            max-width: 1400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .page-header {
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .page-header-content {
+            flex: 1;
+        }
+
+        .page-title {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .page-subtitle {
+            font-size: 14px;
+            color: #6b7280;
+        }
+
+        /* ---------------- CARDS ---------------- */
+        .section-card {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        /* ---------------- TABLE ---------------- */
+        .table-wrapper {
+            overflow-x: auto;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background-color: #4285f4;
+            color: white;
+        }
+
+        th {
+            padding: 12px 14px;
+            font-size: 12px;
+            text-transform: uppercase;
+            text-align: left;
+            letter-spacing: 0.5px;
+        }
+
+        .navbar {
+            background-color: #64cbab;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 50px;
+            color: white;
+        }
+
+        .navbar-brand {
+            font-size: 28px;
+            font-weight: 600;
+        }
+
+        .navbar-center {
+            display: flex;
+            gap: 40px;
+        }
+
+        .navbar-center a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            opacity: 0.9;
+        }
+
+        .navbar-center a:hover {
+            opacity: 1;
+        }
+
+        .navbar-right {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .btn-logout {
+            background-color: #ef4444;
+            padding: 8px 18px;
+            border-radius: 8px;
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        td {
+            padding: 16px 14px;
+            font-size: 13px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        tbody tr:hover {
+            background-color: #f9fafb;
+        }
+
+        /* ---------------- STATUS BADGES ---------------- */
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            display: inline-block;
+        }
+
+        .status-approved {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-pending {
+            background-color: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-other {
+            background-color: #e5e7eb;
+            color: #374151;
+        }
+
+        /* ---------------- EMPTY STATE ---------------- */
+        .empty-state {
+            text-align: center;
+            padding: 50px 20px;
+            color: #6b7280;
+        }
+
+        .empty-state-icon {
+            font-size: 60px;
+            margin-bottom: 12px;
+        }
+
+        /* ---------------- ACTION BUTTON ---------------- */
+        .btn-schedule {
+            background-color: #ef4444;
+            color: white;
+            padding: 10px 22px;
+            border-radius: 8px;
+            font-weight: 600;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .btn-schedule:hover {
+            background-color: #dc2626;
+        }
+
+        /* ---------------- RESPONSIVE ---------------- */
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
+                height: auto;
+                gap: 15px;
+                padding: 20px;
+            }
+
+            .navbar-center {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .main-content {
+                padding: 20px;
+            }
+
+            table {
+                min-width: 900px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="navbar">
+        <div class="navbar-brand">SwasthyaCare</div>
+        <div class="navbar-center">
+            <a href="{% url 'hospital:doctor_dashboard' %}">Dashboard</a>
+            <a href="{% url 'hospital:doctor_appointments' %}">Appointments</a>
+            <a href="{% url 'hospital:view_surgeries' %}">Surgeries</a>
+            <a href="{% url 'hospital:manage_availability' %}">Availability</a>
         </div>
-        {% else %}
-        <div class="empty-state">
-            <div class="empty-state-icon">📅</div>
-            <p class="empty-state-text">No upcoming surgeries scheduled</p>
+        <div class="navbar-right">
+            <span>{{ doctor.user.get_full_name }}</span>
+            <a href="{% url 'hospital:logout' %}" class="btn-logout">Logout</a>
         </div>
-        {% endif %}
+    </nav>
+
+    <!-- MAIN CONTENT -->
+    <div class="main-content">
+
+        <div class="page-header">
+            <div class="page-header-content">
+                <h1 class="page-title">My Surgeries</h1>
+                <p class="page-subtitle">View all scheduled surgeries</p>
+            </div>
+            <a href="{% url 'hospital:create_urgent_surgery_doctor' %}" class="btn-schedule">
+                🚨 Schedule New Surgery
+            </a>
+        </div>
+
+        <!-- UPCOMING SURGERIES -->
+        <div class="section-card">
+            <h2 class="section-title">Upcoming Surgeries</h2>
+
+            {% if upcoming_surgeries %}
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Surgery Type</th>
+                            <th>Patient</th>
+                            <th>Date</th>
+                            <th>Time</th>
+                            <th>Status</th>
+                            <th>Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for surgery in upcoming_surgeries %}
+                        <tr>
+                            <td><strong>{{ surgery.surgery_type }}</strong></td>
+                            <td>{{ surgery.patient_name }}</td>
+                            <td>{{ surgery.surgery_date }}</td>
+                            <td>{{ surgery.start_time|time:"h:i A" }} - {{ surgery.end_time|time:"h:i A" }}</td>
+                            <td>
+                                {% if surgery.status == 'APPROVED' %}
+                                <span class="status-badge status-approved">{{ surgery.get_status_display }}</span>
+                                {% elif surgery.status == 'PENDING' %}
+                                <span class="status-badge status-pending">{{ surgery.get_status_display }}</span>
+                                {% else %}
+                                <span class="status-badge status-other">{{ surgery.get_status_display }}</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ surgery.notes|truncatewords:10|default:"-" }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-state-icon">📅</div>
+                <p>No upcoming surgeries scheduled</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- PAST SURGERIES -->
+        <div class="section-card">
+            <h2 class="section-title">Past Surgeries (Last 10)</h2>
+
+            {% if past_surgeries %}
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Surgery Type</th>
+                            <th>Patient</th>
+                            <th>Date</th>
+                            <th>Time</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for surgery in past_surgeries %}
+                        <tr style="opacity: 0.7;">
+                            <td><strong>{{ surgery.surgery_type }}</strong></td>
+                            <td>{{ surgery.patient_name }}</td>
+                            <td>{{ surgery.surgery_date }}</td>
+                            <td>{{ surgery.start_time|time:"h:i A" }} - {{ surgery.end_time|time:"h:i A" }}</td>
+                            <td>
+                                <span class="status-badge status-other">{{ surgery.get_status_display }}</span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-state-icon">📋</div>
+                <p>No past surgeries</p>
+            </div>
+            {% endif %}
+        </div>
+
     </div>
-</div>
 
-<div class="card">
-    <div class="card-header">Past Surgeries (Last 10)</div>
-    <div class="card-body">
-        {% if past_surgeries %}
-        <div class="table-container">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Surgery Type</th>
-                        <th>Patient</th>
-                        <th>Date</th>
-                        <th>Time</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for surgery in past_surgeries %}
-                    <tr style="opacity: 0.7;">
-                        <td><strong>{{ surgery.surgery_type }}</strong></td>
-                        <td>{{ surgery.patient_name }}</td>
-                        <td>{{ surgery.surgery_date }}</td>
-                        <td>
-                            {{ surgery.start_time|time:"h:i A" }} - {{ surgery.end_time|time:"h:i A" }}
-                        </td>
-                        <td>
-                            <span class="badge badge-{{ surgery.status|lower }}">{{ surgery.get_status_display }}</span>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        {% else %}
-        <div class="empty-state">
-            <div class="empty-state-icon">📋</div>
-            <p class="empty-state-text">No past surgeries</p>
-        </div>
-        {% endif %}
-    </div>
-</div>
+</body>
 
-<div class="flex-between mt-3">
-    <a href="{% url 'hospital:doctor_dashboard' %}" class="btn btn-secondary">Back to Dashboard</a>
-    <a href="{% url 'hospital:create_urgent_surgery_doctor' %}" class="btn btn-danger">🚨 Schedule New Surgery</a>
-</div>
-{% endblock %}
+</html>
