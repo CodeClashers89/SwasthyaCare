@@ -260,6 +260,7 @@ def manage_availability(request):
     context = {
         'form': form,
         'availabilities': availabilities,
+        'doctor': doctor,
     }
     return render(request, 'hospital/doctor/availability.html', context)
 
