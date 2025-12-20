@@ -30,25 +30,36 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0 60px;
+            padding: 0 50px;
             color: white;
         }
 
         .navbar-brand {
-            font-size: 32px;
+            font-size: 28px;
+            font-weight: 600;
         }
 
-        .nav-links {
+        .navbar-center {
             display: flex;
             gap: 40px;
         }
 
-        .nav-links a {
+        .navbar-center a {
             color: white;
             text-decoration: none;
             font-weight: 500;
+            opacity: 0.9;
         }
 
+        .navbar-center a:hover {
+            opacity: 1;
+        }
+
+        .navbar-right {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
         /* 🔥 80% WINDOW WIDTH */
         .main-content {
             width: 80vw;
@@ -198,6 +209,14 @@
         }
 
         /* ===== BUTTON ===== */
+        .btn-logout {
+            background-color: #ef4444;
+            padding: 8px 18px;
+            border-radius: 8px;
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+        }
         .btn {
             display: inline-block;
             padding: 12px 28px;
@@ -237,10 +256,14 @@
 
     <!-- NAVBAR -->
     <nav class="navbar">
-        <div class="navbar-brand">Swasthya Care</div>
-        <div class="nav-links">
+        <div class="navbar-brand">SwasthyaCare</div>
+        <div class="navbar-center">
             <a href="{% url 'hospital:patient_dashboard' %}">Dashboard</a>
             <a href="{% url 'hospital:check_doctor_availability' %}">Doctor Availability</a>
+        </div>
+        <div class="navbar-right">
+            <span>{{ patient.user.get_full_name }}</span>
+            <a href="{% url 'hospital:logout' %}" class="btn-logout">Logout</a>
         </div>
     </nav>
 
