@@ -1,87 +1,380 @@
-{% extends 'base.html' %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Create Urgent Surgery - SwasthyaCare</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-{% block title %}Create Urgent Surgery - SwasthyaCare{% endblock %}
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-{% block content %}
-<div class="page-header">
-    <h1 class="page-title">Schedule Urgent Surgery</h1>
-    <p class="page-subtitle">Create an urgent surgery schedule</p>
-</div>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-<div class="card">
-    <div class="card-header">Surgery Details</div>
-    <div class="card-body">
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: rgba(211, 255, 240, 0.53);
+            color: #1a1a1a;
+            min-height: 100vh;
+        }
+
+        /* NAVBAR */
+        .navbar {
+            background-color: #64cbab;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 50px;
+            color: white;
+        }
+
+        .navbar-brand {
+            font-size: 26px;
+            font-weight: 600;
+        }
+
+        .navbar-center {
+            display: flex;
+            gap: 35px;
+        }
+
+        .navbar-center a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            opacity: 0.9;
+        }
+
+        .navbar-center a:hover {
+            opacity: 1;
+        }
+
+        .navbar-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .btn-logout {
+            background-color: #ef4444;
+            padding: 8px 16px;
+            border-radius: 8px;
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        /* MAIN CONTENT */
+        .main-content {
+            max-width: 900px;
+            margin: 100px auto 40px;
+            padding: 0 20px;
+        }
+
+        /* PAGE HEADER */
+        .page-header {
+            margin-bottom: 30px;
+        }
+
+        .navbar {
+            background-color: #64cbab;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 50px;
+            color: white;
+        }
+
+        .navbar-brand {
+            font-size: 28px;
+            font-weight: 600;
+        }
+
+        .navbar-center {
+            display: flex;
+            gap: 40px;
+        }
+
+        .navbar-center a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            opacity: 0.9;
+        }
+
+        .navbar-center a:hover {
+            opacity: 1;
+        }
+
+        .navbar-right {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .btn-logout {
+            background-color: #ef4444;
+            padding: 8px 18px;
+            border-radius: 8px;
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .page-title {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .page-subtitle {
+            font-size: 14px;
+            color: #757575;
+        }
+
+        /* CARD */
+        .card {
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            padding: 30px;
+            margin-bottom: 25px;
+        }
+
+        .card-header {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 25px;
+        }
+
+        /* FORM */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        input, select, textarea {
+            padding: 10px 12px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            font-size: 14px;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #64cbab;
+        }
+
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .error-message {
+            color: #ef4444;
+            font-size: 12px;
+            margin-top: 4px;
+        }
+
+        /* ALERTS */
+        .alert {
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            margin-top: 20px;
+        }
+
+        .alert-danger {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+
+        .alert-info {
+            background-color: #e3f2fd;
+            color: #0d47a1;
+            border-left: 4px solid #2196f3;
+        }
+
+        /* BUTTONS */
+        .flex-between {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 25px;
+        }
+
+        .btn {
+            padding: 12px 26px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .btn-primary {
+            background-color: #4285f4;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #3367d6;
+        }
+
+        .btn-secondary {
+            background-color: #64cbab;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #52b899;
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
+                height: auto;
+                padding: 15px;
+                gap: 10px;
+            }
+
+            .main-content {
+                margin-top: 40px;
+            }
+
+            .flex-between {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+        <div class="navbar-brand">SwasthyaCare</div>
+        <div class="navbar-center">
+            <a href="{% url 'hospital:doctor_dashboard' %}">Dashboard</a>
+            <a href="{% url 'hospital:doctor_appointments' %}">Appointments</a>
+            <a href="{% url 'hospital:view_surgeries' %}">Surgeries</a>
+            <a href="{% url 'hospital:manage_availability' %}">Availability</a>
+        </div>
+        <div class="navbar-right">
+            <span>{{ doctor.user.get_full_name }}</span>
+            <a href="{% url 'hospital:logout' %}" class="btn-logout">Logout</a>
+        </div>
+    </nav>
+
+<!-- MAIN CONTENT -->
+<div class="main-content">
+
+    <div class="page-header">
+        <h1 class="page-title">Schedule Urgent Surgery</h1>
+        <p class="page-subtitle">Create an urgent surgery schedule</p>
+    </div>
+
+    <div class="card">
+        <div class="card-header">Surgery Details</div>
+
         <form method="post">
             {% csrf_token %}
 
             <div class="form-grid">
+
                 <div class="form-group">
-                    <label for="{{ form.surgery_type.id_for_label }}">Surgery Type *</label>
+                    <label>Surgery Type *</label>
                     {{ form.surgery_type }}
                     {% if form.surgery_type.errors %}
-                    <div class="error-message">{{ form.surgery_type.errors }}</div>
+                        <div class="error-message">{{ form.surgery_type.errors }}</div>
                     {% endif %}
                 </div>
 
                 <div class="form-group">
-                    <label for="{{ form.patient_name.id_for_label }}">Patient Name *</label>
+                    <label>Patient Name *</label>
                     {{ form.patient_name }}
                     {% if form.patient_name.errors %}
-                    <div class="error-message">{{ form.patient_name.errors }}</div>
+                        <div class="error-message">{{ form.patient_name.errors }}</div>
                     {% endif %}
                 </div>
 
                 <div class="form-group">
-                    <label for="{{ form.surgery_date.id_for_label }}">Surgery Date *</label>
+                    <label>Surgery Date *</label>
                     {{ form.surgery_date }}
                     {% if form.surgery_date.errors %}
-                    <div class="error-message">{{ form.surgery_date.errors }}</div>
+                        <div class="error-message">{{ form.surgery_date.errors }}</div>
                     {% endif %}
                 </div>
 
                 <div class="form-group">
-                    <label for="{{ form.start_time.id_for_label }}">Start Time *</label>
+                    <label>Start Time *</label>
                     {{ form.start_time }}
                     {% if form.start_time.errors %}
-                    <div class="error-message">{{ form.start_time.errors }}</div>
+                        <div class="error-message">{{ form.start_time.errors }}</div>
                     {% endif %}
                 </div>
 
                 <div class="form-group">
-                    <label for="{{ form.end_time.id_for_label }}">End Time *</label>
+                    <label>End Time *</label>
                     {{ form.end_time }}
                     {% if form.end_time.errors %}
-                    <div class="error-message">{{ form.end_time.errors }}</div>
+                        <div class="error-message">{{ form.end_time.errors }}</div>
                     {% endif %}
                 </div>
+
             </div>
 
             <div class="form-group">
-                <label for="{{ form.notes.id_for_label }}">Additional Notes</label>
+                <label>Additional Notes</label>
                 {{ form.notes }}
                 {% if form.notes.errors %}
-                <div class="error-message">{{ form.notes.errors }}</div>
+                    <div class="error-message">{{ form.notes.errors }}</div>
                 {% endif %}
             </div>
 
             {{ form.doctor }}
 
             {% if form.non_field_errors %}
-            <div class="alert alert-danger">
-                {{ form.non_field_errors }}
-            </div>
+                <div class="alert alert-danger">
+                    {{ form.non_field_errors }}
+                </div>
             {% endif %}
 
-            <div class="flex-between mt-3">
+            <div class="flex-between">
                 <a href="{% url 'hospital:doctor_dashboard' %}" class="btn btn-secondary">Cancel</a>
                 <button type="submit" class="btn btn-primary">Schedule Surgery</button>
             </div>
         </form>
     </div>
+
+    <div class="alert alert-info">
+        <strong>ℹ️ Note:</strong>
+        If there are any appointments scheduled during the surgery time, you will be prompted to reschedule them.
+    </div>
+
 </div>
 
-<div class="alert alert-info mt-3">
-    <strong>ℹ️ Note:</strong> If there are any appointments scheduled during the surgery time, you will be prompted to
-    reschedule them.
-</div>
-{% endblock %}
+</body>
+</html>
