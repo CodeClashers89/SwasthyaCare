@@ -1,263 +1,506 @@
-{% extends 'base.html' %}
+<!DOCTYPE html>
+<html lang="en">
 
-{% block title %}Add Medical Record - SwasthyaCare{% endblock %}
+<head>
+    <meta charset="UTF-8">
+    <title>Add Medical Record - SwasthyaCare</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-{% block content %}
-<div class="page-header">
-    <h1 class="page-title">Add Medical Record</h1>
-    <p class="page-subtitle">{{ appointment.patient.patient_id }} - {{ appointment.patient.user.get_full_name }}</p>
-</div>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-<div class="card">
-    <div class="card-header">Appointment Details</div>
-    <div class="card-body">
-        <ul class="info-list">
-            <li>
-                <span class="info-label">Patient</span>
-                <span class="info-value">{{ appointment.patient.patient_id }}
-                    -{{appointment.patient.user.get_full_name}}</span>
-            </li>
-            <li>
-                <span class="info-label">Date & Time</span>
-                <span class="info-value">{{ appointment.appointment_date }} at
-                    {{appointment.appointment_time|time:"h:iA" }}</span>
-            </li>
-            <li>
-                <span class="info-label">Reason for Visit</span>
-                <span class="info-value">{{ appointment.reason }}</span>
-            </li>
-        </ul>
-    </div>
-</div>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
 
-<div class="card mt-3">
-    <div class="card-header">Medical Record Form</div>
-    <div class="card-body">
-        <form method="post" enctype="multipart/form-data">
-            {% csrf_token %}
+        body {
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            background: rgba(211, 255, 240, 0.53);
+        }
 
-            <div class="form-group">
-                <label for="{{ form.diagnosis.id_for_label }}" class="form-label">Diagnosis *</label>
-                {{ form.diagnosis }}
-                {% if form.diagnosis.help_text %}
-                <small class="form-help">{{ form.diagnosis.help_text }}</small>
-                {% endif %}
+        /* NAVBAR */
+        .navbar {
+            height: 80px;
+            background: #64cbab;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 50px;
+            color: white;
+        }
+
+        .navbar-brand {
+            font-size: 26px;
+            font-weight: 600;
+        }
+
+        .navbar-center {
+            display: flex;
+            gap: 35px;
+        }
+
+        .navbar-center a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .btn-logout {
+            background: #ef4444;
+            padding: 8px 16px;
+            border-radius: 8px;
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        /* MAIN */
+        .main-content {
+            padding: 30px 50px;
+        }
+
+        .page-title {
+            background: white;
+            padding: 18px 25px;
+            border-radius: 14px;
+            font-size: 24px;
+            font-weight: 600;
+            color: #2d6ec8;
+            margin-bottom: 20px;
+            box-shadow: 2px 2px 10px rgba(0, 0, 0, .15);
+        }
+
+        .section-header {
+            background: #64cbab;
+            color: white;
+            padding: 12px 18px;
+            border-radius: 8px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .navbar {
+            background-color: #64cbab;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 50px;
+            color: white;
+        }
+
+        .navbar-brand {
+            font-size: 28px;
+            font-weight: 600;
+        }
+
+        .navbar-center {
+            display: flex;
+            gap: 40px;
+        }
+
+        .navbar-center a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            opacity: 0.9;
+        }
+
+        .navbar-center a:hover {
+            opacity: 1;
+        }
+
+        .navbar-right {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .btn-logout {
+            background-color: #ef4444;
+            padding: 8px 18px;
+            border-radius: 8px;
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 2px 2px 10px rgba(0, 0, 0, .15);
+        }
+
+        .info-row {
+            display: grid;
+            grid-template-columns: 200px 1fr;
+            padding: 10px 0;
+            border-bottom: 1px solid #ddd;
+            font-size: 14px;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .label {
+            font-weight: 600;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-label {
+            font-weight: 600;
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        input,
+        textarea,
+        select {
+            width: 100%;
+            max-width: 800px;
+            padding: 10px 12px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        textarea {
+            resize: vertical;
+        }
+
+        /* Make prescription textarea wider */
+        #id_prescription {
+            max-width: 95%;
+        }
+
+        /* MEDICINE BUILDER */
+        .medicine-box {
+            background: #f9fafb;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .medicine-grid {
+            margin-bottom: 12px;
+        }
+
+        .timing-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .timing-card {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 10px;
+            font-size: 13px;
+        }
+
+        .timing-card label {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            margin: 4px 0;
+        }
+
+        .timing-card input[type="checkbox"] {
+            width: auto;
+            margin-left: 8px;
+            cursor: pointer;
+        }
+
+        .timing-card input[type="number"] {
+            max-width: 100%;
+            width: 100%;
+            box-sizing: border-box;
+            padding: 8px;
+        }
+
+        .btn-primary {
+            background: #4285f4;
+            color: white;
+            padding: 10px 22px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .medicine-box .btn-primary {
+            width: 100%;
+            padding: 10px;
+        }
+
+        .actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .btn-success {
+            background: #64cbab;
+            color: white;
+            padding: 10px 22px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+        }
+
+        .btn-secondary {
+            background: #6b9ad9;
+            color: white;
+            padding: 10px 22px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="navbar">
+        <div class="navbar-brand">SwasthyaCare</div>
+        <div class="navbar-center">
+            <a href="{% url 'hospital:doctor_dashboard' %}">Dashboard</a>
+            <a href="{% url 'hospital:doctor_appointments' %}">Appointments</a>
+            <a href="{% url 'hospital:view_surgeries' %}">Surgeries</a>
+            <a href="{% url 'hospital:manage_availability' %}">Availability</a>
+        </div>
+        <div class="navbar-right">
+            <span>{{ doctor.user.get_full_name }}</span>
+            <a href="{% url 'hospital:logout' %}" class="btn-logout">Logout</a>
+        </div>
+    </nav>
+
+    <!-- MAIN -->
+    <div class="main-content">
+
+        <div class="page-title">
+            Add Medical Record – {{ appointment.patient.patient_id }}
+            ({{ appointment.patient.user.get_full_name }})
+        </div>
+
+        <!-- APPOINTMENT DETAILS -->
+        <div class="section-header">Appointment Details</div>
+        <div class="card">
+            <div class="info-row">
+                <div class="label">Patient</div>
+                <div>{{ appointment.patient.user.get_full_name }}</div>
             </div>
+            <div class="info-row">
+                <div class="label">Date & Time</div>
+                <div>{{ appointment.appointment_date }} at {{ appointment.appointment_time|time:"h:i A" }}</div>
+            </div>
+            <div class="info-row">
+                <div class="label">Reason</div>
+                <div>{{ appointment.reason }}</div>
+            </div>
+        </div>
 
-            <div class="form-group">
-                <label for="{{ form.prescription.id_for_label }}" class="form-label">Prescription *</label>
+        <!-- FORM -->
+        <div class="section-header">Medical Record Form</div>
+        <div class="card">
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
 
-                <!-- Medicine Builder Section -->
-                <div class="medicine-builder"
-                    style="background: #f9fafb; padding: 20px; border-radius: 8px; margin-bottom: 15px;">
-                    <h4 style="margin-top: 0; color: #1e40af; font-size: 16px;">Add Medicine</h4>
-
-                    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 10px; margin-bottom: 15px;">
-                        <div>
-                            <label style="display: block; margin-bottom: 5px; font-weight: 500;">Medicine Name</label>
-                            <input list="medicines" id="medicine-input" class="form-control"
-                                placeholder="Select or type medicine name" style="width: 100%;">
-                            <datalist id="medicines">
-                                <!-- Pain Relief -->
-                                <option value="Paracetamol 500mg">
-                                <option value="Ibuprofen 400mg">
-                                <option value="Aspirin 75mg">
-                                <option value="Diclofenac 50mg">
-
-                                    <!-- Antibiotics -->
-                                <option value="Amoxicillin 500mg">
-                                <option value="Azithromycin 250mg">
-                                <option value="Ciprofloxacin 500mg">
-                                <option value="Doxycycline 100mg">
-
-                                    <!-- Cough & Cold -->
-                                <option value="Cough Syrup 10ml">
-                                <option value="Cetirizine 10mg">
-                                <option value="Loratadine 10mg">
-                                <option value="Phenylephrine 10mg">
-
-                                    <!-- Digestive -->
-                                <option value="Omeprazole 20mg">
-                                <option value="Ranitidine 150mg">
-                                <option value="Antacid Syrup 10ml">
-                                <option value="Domperidone 10mg">
-
-                                    <!-- Diabetes -->
-                                <option value="Metformin 500mg">
-                                <option value="Glimepiride 1mg">
-                                <option value="Insulin">
-
-                                    <!-- Blood Pressure -->
-                                <option value="Amlodipine 5mg">
-                                <option value="Atenolol 50mg">
-                                <option value="Losartan 50mg">
-
-                                    <!-- Vitamins -->
-                                <option value="Vitamin D3 60000 IU">
-                                <option value="Vitamin B12 1500mcg">
-                                <option value="Multivitamin">
-                                <option value="Calcium 500mg">
-                            </datalist>
-                        </div>
-
-                        <div>
-                            <label style="display: block; margin-bottom: 5px; font-weight: 500;">Duration (days)</label>
-                            <input type="number" id="duration-input" class="form-control" placeholder="e.g., 5" min="1"
-                                style="width: 100%;">
-                        </div>
-                    </div>
-
-                    <div style="margin-bottom: 15px;">
-                        <label style="display: block; margin-bottom: 10px; font-weight: 500; color: #1e40af;">When to
-                            take:</label>
-                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;">
-                            <!-- Morning -->
-                            <div
-                                style="background: white; padding: 12px; border-radius: 6px; border: 1px solid #e5e7eb;">
-                                <h5 style="margin: 0 0 10px 0; color: #f59e0b; font-size: 14px;">🌅 Morning</h5>
-                                <label style="display: block; margin-bottom: 5px; cursor: pointer;">
-                                    <input type="checkbox" id="morning-before" style="margin-right: 5px;">
-                                    Before breakfast
-                                </label>
-                                <label style="display: block; cursor: pointer;">
-                                    <input type="checkbox" id="morning-after" style="margin-right: 5px;">
-                                    After breakfast
-                                </label>
-                            </div>
-
-                            <!-- Afternoon -->
-                            <div
-                                style="background: white; padding: 12px; border-radius: 6px; border: 1px solid #e5e7eb;">
-                                <h5 style="margin: 0 0 10px 0; color: #f59e0b; font-size: 14px;">☀️ Afternoon</h5>
-                                <label style="display: block; margin-bottom: 5px; cursor: pointer;">
-                                    <input type="checkbox" id="afternoon-before" style="margin-right: 5px;">
-                                    Before lunch
-                                </label>
-                                <label style="display: block; cursor: pointer;">
-                                    <input type="checkbox" id="afternoon-after" style="margin-right: 5px;">
-                                    After lunch
-                                </label>
-                            </div>
-
-                            <!-- Night -->
-                            <div
-                                style="background: white; padding: 12px; border-radius: 6px; border: 1px solid #e5e7eb;">
-                                <h5 style="margin: 0 0 10px 0; color: #6366f1; font-size: 14px;">🌙 Night</h5>
-                                <label style="display: block; margin-bottom: 5px; cursor: pointer;">
-                                    <input type="checkbox" id="night-before" style="margin-right: 5px;">
-                                    Before dinner
-                                </label>
-                                <label style="display: block; cursor: pointer;">
-                                    <input type="checkbox" id="night-after" style="margin-right: 5px;">
-                                    After dinner
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-
-                    <button type="button" onclick="addMedicine()" class="btn btn-primary" style="width: 100%;">
-                        ➕ Add to Prescription
-                    </button>
+                <div class="form-group">
+                    <label class="form-label">Diagnosis *</label>
+                    {{ form.diagnosis }}
                 </div>
 
-                <!-- Prescription Textarea -->
-                {{ form.prescription }}
-                {% if form.prescription.help_text %}
-                <small class="form-help">{{ form.prescription.help_text }}</small>
-                {% endif %}
-                <small class="form-help" style="display: block; margin-top: 5px; color: #10b981;">
-                    ✓ Medicines will be added here automatically. You can also type manually.
-                </small>
-            </div>
+                <div class="form-group">
+                    <label class="form-label">Prescription *</label>
 
-            <script>
-                function addMedicine() {
-                    const medicine = document.getElementById('medicine-input').value.trim();
-                    const duration = document.getElementById('duration-input').value.trim();
+                    <!-- Medicine Builder -->
+                    <div class="medicine-box">
+                        <div class="medicine-grid">
+                            <div>
+                                <input list="medicines" id="medicine" placeholder="Start typing to see suggestions..."
+                                    autocomplete="off">
+                                <datalist id="medicines">
+                                    <!-- Pain Relief -->
+                                    <option value="Paracetamol 500mg">
+                                    <option value="Ibuprofen 400mg">
+                                    <option value="Aspirin 75mg">
+                                    <option value="Diclofenac 50mg">
 
-                    if (!medicine) {
-                        alert('Please enter a medicine name');
-                        return;
-                    }
+                                        <!-- Antibiotics -->
+                                    <option value="Amoxicillin 500mg">
+                                    <option value="Azithromycin 250mg">
+                                    <option value="Ciprofloxacin 500mg">
+                                    <option value="Doxycycline 100mg">
 
-                    // Get selected timings
-                    const timings = [];
-                    if (document.getElementById('morning-before').checked) timings.push('Morning (Before breakfast)');
-                    if (document.getElementById('morning-after').checked) timings.push('Morning (After breakfast)');
-                    if (document.getElementById('afternoon-before').checked) timings.push('Afternoon (Before lunch)');
-                    if (document.getElementById('afternoon-after').checked) timings.push('Afternoon (After lunch)');
-                    if (document.getElementById('night-before').checked) timings.push('Night (Before dinner)');
-                    if (document.getElementById('night-after').checked) timings.push('Night (After dinner)');
+                                        <!-- Cough & Cold -->
+                                    <option value="Cough Syrup 10ml">
+                                    <option value="Cetirizine 10mg">
+                                    <option value="Loratadine 10mg">
+                                    <option value="Phenylephrine 10mg">
 
-                    if (timings.length === 0) {
-                        alert('Please select at least one timing');
-                        return;
-                    }
+                                        <!-- Digestive -->
+                                    <option value="Omeprazole 20mg">
+                                    <option value="Ranitidine 150mg">
+                                    <option value="Antacid Syrup 10ml">
+                                    <option value="Domperidone 10mg">
 
-                    // Build prescription line
-                    let prescriptionLine = medicine;
-                    if (duration) {
-                        prescriptionLine += ` - ${duration} days`;
-                    }
-                    prescriptionLine += `\n   Timing: ${timings.join(', ')}`;
+                                        <!-- Diabetes -->
+                                    <option value="Metformin 500mg">
+                                    <option value="Glimepiride 1mg">
+                                    <option value="Insulin">
 
-                    // Add to prescription textarea
-                    const prescriptionField = document.getElementById('{{ form.prescription.id_for_label }}');
-                    const currentValue = prescriptionField.value.trim();
+                                        <!-- Blood Pressure -->
+                                    <option value="Amlodipine 5mg">
+                                    <option value="Atenolol 50mg">
+                                    <option value="Losartan 50mg">
 
-                    // Count existing medicines
-                    const medicineCount = currentValue ? (currentValue.match(/^\d+\./gm) || []).length + 1 : 1;
+                                        <!-- Vitamins -->
+                                    <option value="Vitamin D3 60000 IU">
+                                    <option value="Vitamin B12 1500mcg">
+                                    <option value="Multivitamin">
+                                    <option value="Calcium 500mg">
+                                </datalist>
+                            </div>
+                        </div>
 
-                    // Add new medicine
-                    const newEntry = `${medicineCount}. ${prescriptionLine}`;
-                    prescriptionField.value = currentValue ? currentValue + '\n\n' + newEntry : newEntry;
+                        <div class="timing-grid">
+                            <div class="timing-card">
+                                <strong>Morning</strong><br>
+                                <label>Before breakfast <input type="checkbox" id="morning-before"
+                                        value="Before breakfast"></label><br>
+                                <label>After breakfast <input type="checkbox" id="morning-after"
+                                        value="After breakfast"></label>
+                            </div>
+                            <div class="timing-card">
+                                <strong>Afternoon</strong><br>
+                                <label>Before lunch <input type="checkbox" id="afternoon-before"
+                                        value="Before lunch"></label><br>
+                                <label>After lunch <input type="checkbox" id="afternoon-after"
+                                        value="After lunch"></label>
+                            </div>
+                            <div class="timing-card">
+                                <strong>Night</strong><br>
+                                <label>Before dinner <input type="checkbox" id="night-before"
+                                        value="Before dinner"></label><br>
+                                <label>After dinner <input type="checkbox" id="night-after"
+                                        value="After dinner"></label>
+                            </div>
+                            <div class="timing-card">
+                                <strong>Duration</strong><br>
+                                <input id="duration" type="number" placeholder="Days" min="1" style="margin-top: 8px;">
+                            </div>
+                        </div>
 
-                    // Clear form
-                    document.getElementById('medicine-input').value = '';
-                    document.getElementById('duration-input').value = '';
-                    document.getElementById('morning-before').checked = false;
-                    document.getElementById('morning-after').checked = false;
-                    document.getElementById('afternoon-before').checked = false;
-                    document.getElementById('afternoon-after').checked = false;
-                    document.getElementById('night-before').checked = false;
-                    document.getElementById('night-after').checked = false;
+                        <button type="button" class="btn-primary" onclick="addMedicine()">
+                            ➕ Add to Prescription
+                        </button>
+                    </div>
 
-                    // Focus back on medicine input
-                    document.getElementById('medicine-input').focus();
-                }
+                    {{ form.prescription }}
+                </div>
 
-                // Allow Enter key to add medicine
-                document.getElementById('medicine-input').addEventListener('keypress', function (e) {
-                    if (e.key === 'Enter') {
-                        e.preventDefault();
-                        addMedicine();
-                    }
-                });
-            </script>
+                <div class="form-group">
+                    <label class="form-label">Report File</label>
+                    {{ form.report_file }}
+                </div>
 
-            <div class="form-group">
-                <label for="{{ form.report_file.id_for_label }}" class="form-label">Report File (Optional)</label>
-                {{ form.report_file }}
-                <small class="form-help">Upload medical reports, test results, or scan images</small>
-            </div>
+                <div class="form-group">
+                    <label class="form-label">Additional Notes</label>
+                    {{ form.notes }}
+                </div>
 
-            <div class="form-group">
-                <label for="{{ form.notes.id_for_label }}" class="form-label">Additional Notes</label>
-                {{ form.notes }}
-                {% if form.notes.help_text %}
-                <small class="form-help">{{ form.notes.help_text }}</small>
-                {% endif %}
-            </div>
-
-            <div class="flex-gap mt-3">
-                <button type="submit" class="btn btn-success">Save Medical Record</button>
-                {% if medical_record %}
-                <a href="{% url 'hospital:download_medical_record_pdf' medical_record.id %}"
-                    class="btn btn-primary">Print Record</a>
-                {% endif %}
-                <a href="{% url 'hospital:doctor_appointments' %}" class="btn btn-secondary">Cancel</a>
-            </div>
-        </form>
+                <div class="actions">
+                    <button type="submit" class="btn-success">Save Medical Record</button>
+                    {% if medical_record %}
+                    <a href="{% url 'hospital:download_medical_record_pdf' medical_record.id %}"
+                        class="btn btn-primary">Print Record</a>
+                    {% endif %}
+                    <a href="{% url 'hospital:doctor_appointments' %}" class="btn-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
     </div>
-</div>
-{% endblock %}
+
+    <script>
+        function addMedicine() {
+            const medicine = document.getElementById('medicine').value.trim();
+            const duration = document.getElementById('duration').value.trim();
+
+            if (!medicine) {
+                alert('Please enter a medicine name');
+                return;
+            }
+
+            // Get selected timings with better formatting
+            const timings = [];
+            if (document.getElementById('morning-before').checked) timings.push('Morning (Before breakfast)');
+            if (document.getElementById('morning-after').checked) timings.push('Morning (After breakfast)');
+            if (document.getElementById('afternoon-before').checked) timings.push('Afternoon (Before lunch)');
+            if (document.getElementById('afternoon-after').checked) timings.push('Afternoon (After lunch)');
+            if (document.getElementById('night-before').checked) timings.push('Night (Before dinner)');
+            if (document.getElementById('night-after').checked) timings.push('Night (After dinner)');
+
+            if (timings.length === 0) {
+                alert('Please select at least one timing');
+                return;
+            }
+
+            // Build prescription line
+            let prescriptionLine = medicine;
+            if (duration) {
+                prescriptionLine += ` - ${duration} days`;
+            }
+            prescriptionLine += `\n   Timing: ${timings.join(', ')}`;
+
+            // Add to prescription textarea
+            const prescriptionField = document.getElementById('{{ form.prescription.id_for_label }}');
+            const currentValue = prescriptionField.value.trim();
+
+            // Count existing medicines
+            const medicineCount = currentValue ? (currentValue.match(/^\d+\./gm) || []).length + 1 : 1;
+
+            // Add new medicine
+            const newEntry = `${medicineCount}. ${prescriptionLine}`;
+            prescriptionField.value = currentValue ? currentValue + '\n\n' + newEntry : newEntry;
+
+            // Clear form
+            document.getElementById('medicine').value = '';
+            document.getElementById('duration').value = '';
+            document.getElementById('morning-before').checked = false;
+            document.getElementById('morning-after').checked = false;
+            document.getElementById('afternoon-before').checked = false;
+            document.getElementById('afternoon-after').checked = false;
+            document.getElementById('night-before').checked = false;
+            document.getElementById('night-after').checked = false;
+
+            // Focus back on medicine input
+            document.getElementById('medicine').focus();
+        }
+
+        // Allow Enter key to add medicine
+        document.getElementById('medicine').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                addMedicine();
+            }
+        });
+    </script>
+
+</body>
+
+</html>
