@@ -16,13 +16,18 @@
 
         /* NAVBAR */
         .navbar {
+            background-color: #64cbab;
             height: 80px;
-            background: #64cbab;
             display: flex;
             align-items: center;
             justify-content: space-between;
             padding: 0 50px;
             color: white;
+        }
+
+        .navbar-brand {
+            font-size: 28px;
+            font-weight: 600;
         }
 
         .navbar a {
@@ -166,14 +171,9 @@
 <body>
 
 <!-- NAVBAR -->
-<div class="navbar">
-    <strong>SwasthyaCare</strong>
-    <div>
-        <a href="{% url 'hospital:doctor_dashboard' %}">Dashboard</a>
-        <a href="{% url 'hospital:view_pending_surgeries' %}">Pending Surgeries</a>
-    </div>
-    <a href="{% url 'hospital:logout' %}" class="logout">Logout</a>
-</div>
+<nav class="navbar">
+    <div class="navbar-brand">SwasthyaCare</div>
+</nav>
 
 <div class="container">
 
