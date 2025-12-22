@@ -963,11 +963,12 @@ def bulk_reschedule_appointments(request, surgery_id):
                     related_appointment=appointment
                 )
                 
-                # Send email notification to patient
+                # Send email notification to patient (with timeout to prevent worker hangs)
                 try:
-                    from django.core.mail import EmailMultiAlternatives
+                    from django.core.mail import EmailMultiAlternatives, get_connection
                     from django.template.loader import render_to_string
                     from django.conf import settings
+                    import socket
                     
                     patient_email = appointment.patient.user.email
                     
@@ -996,23 +997,29 @@ def bulk_reschedule_appointments(request, surgery_id):
                         from_email = settings.DEFAULT_FROM_EMAIL
                         to_email = [patient_email]
                         
+                        # Create connection with timeout to prevent worker hangs
+                        connection = get_connection(
+                            timeout=10  # 10 second timeout
+                        )
+                        
                         # Create email message with HTML
                         email = EmailMultiAlternatives(
                             subject=subject,
                             body=f"Dear {email_context['patient_name']},\n\nYour appointment has been rescheduled. Please see the details in the HTML version of this email.",
                             from_email=from_email,
-                            to=to_email
+                            to=to_email,
+                            connection=connection
                         )
                         email.attach_alternative(html_content, "text/html")
                         
-                        # Send email
+                        # Send email with timeout protection
                         email.send(fail_silently=True)
                         
-                except Exception as e:
+                except (socket.timeout, socket.error, Exception) as e:
                     # Log error but don't block the reschedule process
                     import logging
                     logger = logging.getLogger(__name__)
-                    logger.error(f"Failed to send email to {appointment.patient.user.email}: {str(e)}")
+                    logger.warning(f"Failed to send email to {appointment.patient.user.email}: {str(e)}")
             
             messages.success(request, f'Successfully rescheduled {len(reschedule_data)} appointment(s). Patients have been notified via email and in-app notification.')
             return redirect('hospital:doctor_dashboard')

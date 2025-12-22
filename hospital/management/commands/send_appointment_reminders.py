@@ -47,13 +47,19 @@ class Command(BaseCommand):
                 html_message = render_to_string('hospital/email/appointment_reminder.html', context)
                 plain_message = strip_tags(html_message)
                 
+                
+                # Send email with timeout to prevent hanging
+                from django.core.mail import get_connection
+                connection = get_connection(timeout=10)  # 10 second timeout
+                
                 send_mail(
                     subject,
                     plain_message,
                     settings.DEFAULT_FROM_EMAIL,
                     [appointment.patient.user.email],
                     fail_silently=False,
-                    html_message=html_message
+                    html_message=html_message,
+                    connection=connection
                 )
                 
                 success_count += 1
