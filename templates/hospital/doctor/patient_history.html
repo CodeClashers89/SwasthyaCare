@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>Patient Dashboard - SwasthyaCare</title>
@@ -111,7 +112,7 @@
         .card {
             background: white;
             border-radius: 22px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
             overflow: hidden;
             width: 100%;
             height: 100%;
@@ -254,117 +255,122 @@
 
 <body>
 
-<div class="page-container">
+    <div class="page-container">
 
-    <!-- NAVBAR -->
-    <nav class="navbar">
-        <div class="navbar-brand">SwasthyaCare</div>
-    </nav>
+        <!-- NAVBAR -->
+        <nav class="navbar">
+            <div class="navbar-brand">SwasthyaCare</div>
+        </nav>
 
-    <!-- CONTENT -->
-    <main class="main-content">
+        <!-- CONTENT -->
+        <main class="main-content">
 
-        <div class="page-header">
-            <h1 class="page-title">Patient History</h1>
-            <p class="page-subtitle">
-                {{ patient.patient_id }} – {{ patient.user.get_full_name }}
-            </p>
-        </div>
-
-        <!-- TOP CARDS -->
-        <div class="grid grid-2">
-            <div class="card">
-                <div class="card-header">Patient Information</div>
-                <div class="card-body">
-                    <ul class="info-list">
-                        <li><span class="info-label">Patient ID</span><span>{{ patient.patient_id }}</span></li>
-                        <li><span class="info-label">Name</span><span>{{ patient.user.get_full_name }}</span></li>
-                        <li><span class="info-label">DOB</span><span>{{ patient.date_of_birth }}</span></li>
-                        <li><span class="info-label">Gender</span><span>{{ patient.get_gender_display }}</span></li>
-                        <li><span class="info-label">Blood Group</span><span>{{ patient.blood_group|default:"N/A" }}</span></li>
-                        <li><span class="info-label">Phone</span><span>{{ patient.user.phone }}</span></li>
-                        <li><span class="info-label">Email</span><span>{{ patient.user.email }}</span></li>
-                    </ul>
-                </div>
+            <div class="page-header">
+                <h1 class="page-title">Patient History</h1>
+                <p class="page-subtitle">
+                    {{ patient.patient_id }} – {{ patient.user.get_full_name }}
+                </p>
             </div>
 
-            <div class="card">
-                <div class="card-header">Medical Information</div>
-                <div class="card-body">
-                    <p><strong>Allergies:</strong> {{ patient.allergies|default:"None" }}</p><br>
-                    <p><strong>Chronic Diseases:</strong> {{ patient.chronic_diseases|default:"None" }}</p><br>
-                    <p><strong>Surgeries:</strong> {{ patient.previous_surgeries|default:"None" }}</p>
+            <!-- TOP CARDS -->
+            <div class="grid grid-2">
+                <div class="card">
+                    <div class="card-header">Patient Information</div>
+                    <div class="card-body">
+                        <ul class="info-list">
+                            <li><span class="info-label">Patient ID</span><span>{{ patient.patient_id }}</span></li>
+                            <li><span class="info-label">Name</span><span>{{ patient.user.get_full_name }}</span></li>
+                            <li><span class="info-label">DOB</span><span>{{ patient.date_of_birth }}</span></li>
+                            <li><span class="info-label">Gender</span><span>{{ patient.get_gender_display }}</span></li>
+                            <li><span class="info-label">Blood Group</span><span>{{ patient.blood_group|default:"N/A"}}</span></li>
+                            <li><span class="info-label">Phone</span><span>{{ patient.user.phone }}</span></li>
+                            <li><span class="info-label">Email</span><span>{{ patient.user.email }}</span></li>
+                        </ul>
+                    </div>
                 </div>
-            </div>
-        </div>
- <div class="mt-3">
-            <a href="{% url 'hospital:doctor_appointments' %}" class="btn btn-secondary">Back</a>
-        </div>
-        <!-- APPOINTMENTS -->
-        <div class="grid grid-1 mt-3">
-            <div class="card">
-                <div class="card-header">Appointment History</div>
-                <div class="card-body">
-                    <table>
-                        <thead>
-                        <tr>
-                            <th>Date & Time</th>
-                            <th>Doctor</th>
-                            <th>Reason</th>
-                            <th>Status</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {% for appointment in appointments %}
-                        <tr>
-                            <td>{{ appointment.appointment_date }}<br>{{ appointment.appointment_time|time:"h:i A" }}</td>
-                            <td>Dr. {{ appointment.doctor.user.get_full_name }}</td>
-                            <td>{{ appointment.reason }}</td>
-                            <td>
-                                <span class="badge badge-{{ appointment.status|lower }}">
-                                    {{ appointment.get_status_display }}
-                                </span>
-                            </td>
-                        </tr>
-                        {% empty %}
-                        <tr><td colspan="4">No appointments found</td></tr>
-                        {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
 
-        <!-- MEDICAL RECORDS -->
-        <div class="grid grid-1 mt-3">
-            <div class="card">
-                <div class="card-header">Medical Records</div>
-                <div class="card-body">
-                    <div class="timeline">
-                        {% for record in medical_records %}
-                        <div class="timeline-item">
-                            <div class="timeline-date">
-                                {{ record.created_at|date:"F d, Y - h:i A" }}
-                            </div>
-                            <p><strong>Diagnosis:</strong> {{ record.diagnosis }}</p>
-                            <p><strong>Prescription:</strong> {{ record.prescription }}</p>
-                            {% if record.notes %}
-                                <p><strong>Notes:</strong> {{ record.notes }}</p>
-                            {% endif %}
-                            {% if record.report_file %}
-                                <a href="{{ record.report_file.url }}" class="btn" target="_blank">View Report</a>
-                            {% endif %}
-                        </div>
-                        {% empty %}
-                        <p>No medical records found</p>
-                        {% endfor %}
+                <div class="card">
+                    <div class="card-header">Medical Information</div>
+                    <div class="card-body">
+                        <p><strong>Allergies:</strong> {{ patient.allergies|default:"None" }}</p><br>
+                        <p><strong>Chronic Diseases:</strong> {{ patient.chronic_diseases|default:"None" }}</p><br>
+                        <p><strong>Surgeries:</strong> {{ patient.previous_surgeries|default:"None" }}</p>
                     </div>
                 </div>
             </div>
-        </div>
+            <div class="mt-3">
+                <a href="{% url 'hospital:doctor_appointments' %}" class="btn btn-secondary">Back</a>
+            </div>
+            <!-- APPOINTMENTS -->
+            <div class="grid grid-1 mt-3">
+                <div class="card">
+                    <div class="card-header">Appointment History</div>
+                    <div class="card-body">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Date & Time</th>
+                                    <th>Doctor</th>
+                                    <th>Reason</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for appointment in appointments %}
+                                <tr>
+                                    <td>{{ appointment.appointment_date }}<br>{{ appointment.appointment_time|time:"h:i A" }}</td>
+                                    <td>Dr. {{ appointment.doctor.user.get_full_name }}</td>
+                                    <td>{{ appointment.reason }}</td>
+                                    <td>
+                                        <span class="badge badge-{{ appointment.status|lower }}">
+                                            {{ appointment.get_status_display }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="4">No appointments found</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
 
-    </main>
-</div>
+            <!-- MEDICAL RECORDS -->
+            <div class="grid grid-1 mt-3">
+                <div class="card">
+                    <div class="card-header">Medical Records</div>
+                    <div class="card-body">
+                        <div class="timeline">
+                            {% for record in medical_records %}
+                            <div class="timeline-item">
+                                <div class="timeline-date">
+                                    {{ record.created_at|date:"F d, Y - h:i A" }}
+                                </div>
+                                <p><strong>Diagnosis:</strong> {{ record.diagnosis }}</p>
+                                <p><strong>Prescription:</strong> {{ record.prescription }}</p>
+                                {% if record.notes %}
+                                <p><strong>Notes:</strong> {{ record.notes }}</p>
+                                {% endif %}
+                                {% if record.report_file %}
+                                <a href="{{ record.report_file.url }}" class="btn" target="_blank">View Report</a>
+                                {% endif %}
+                                <a href="{% url 'hospital:download_medical_record_pdf' record.id %}"
+                                    class="btn">Download Prescription PDF</a>
+                            </div>
+                            {% empty %}
+                            <p>No medical records found</p>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
 
 </body>
+
 </html>

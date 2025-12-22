@@ -926,7 +926,7 @@ def view_surgeries(request):
 
 
 @login_required
-@role_required('DOCTOR')
+@role_required('DOCTOR', 'PATIENT')
 def download_medical_record_pdf(request, record_id):
     """Download medical record as PDF"""
     from reportlab.lib.pagesizes import letter, A4
@@ -939,156 +939,235 @@ def download_medical_record_pdf(request, record_id):
     from io import BytesIO
     
     medical_record = get_object_or_404(MedicalRecord, id=record_id)
-    doctor = request.user.doctor_profile
     
-    # Verify this record belongs to the logged-in doctor
-    if medical_record.doctor != doctor:
-        messages.error(request, 'You can only download your own medical records.')
-        return redirect('hospital:doctor_appointments')
+    # Verify this record belongs to the logged-in doctor or patient
+    if request.user.role == 'DOCTOR':
+        doctor = request.user.doctor_profile
+        if medical_record.doctor != doctor:
+            messages.error(request, 'You can only download your own medical records.')
+            return redirect('hospital:doctor_appointments')
+    elif request.user.role == 'PATIENT':
+        patient = request.user.patient_profile
+        if medical_record.patient != patient:
+            messages.error(request, 'You can only download your own medical records.')
+            return redirect('hospital:patient_dashboard')
     
     # Create the PDF object
     buffer = BytesIO()
-    doc = SimpleDocTemplate(buffer, pagesize=A4, rightMargin=72, leftMargin=72,
-                            topMargin=72, bottomMargin=18)
+    doc = SimpleDocTemplate(buffer, pagesize=A4, rightMargin=50, leftMargin=50,
+                            topMargin=30, bottomMargin=30)
     
     # Container for the 'Flowable' objects
     elements = []
     
     # Define styles
     styles = getSampleStyleSheet()
-    title_style = ParagraphStyle(
-        'CustomTitle',
-        parent=styles['Heading1'],
-        fontSize=24,
-        textColor=colors.HexColor('#2563eb'),
-        spaceAfter=30,
+    
+    # Custom styles for prescription
+    header_style = ParagraphStyle(
+        'Header',
+        parent=styles['Normal'],
+        fontSize=20,
+        textColor=colors.HexColor('#1e3a8a'),
+        spaceAfter=15,
         alignment=TA_CENTER,
         fontName='Helvetica-Bold'
     )
     
-    heading_style = ParagraphStyle(
-        'CustomHeading',
+    subheader_style = ParagraphStyle(
+        'SubHeader',
+        parent=styles['Normal'],
+        fontSize=10,
+        textColor=colors.HexColor('#64748b'),
+        spaceAfter=25,  # Significantly increased spacing after address
+        alignment=TA_CENTER,
+        fontName='Helvetica'
+    )
+    
+    section_heading_style = ParagraphStyle(
+        'SectionHeading',
         parent=styles['Heading2'],
-        fontSize=14,
-        textColor=colors.HexColor('#1e40af'),
-        spaceAfter=12,
-        spaceBefore=12,
+        fontSize=11,
+        textColor=colors.HexColor('#1e3a8a'),
+        spaceAfter=8,
+        spaceBefore=10,
+        fontName='Helvetica-Bold',
+        borderWidth=0,
+        borderColor=colors.HexColor('#cbd5e1'),
+        borderPadding=5,
+        backColor=colors.HexColor('#cbd5e1')
+    )
+    
+    rx_style = ParagraphStyle(
+        'Rx',
+        parent=styles['Normal'],
+        fontSize=24,
+        textColor=colors.HexColor('#1e3a8a'),
+        spaceAfter=10,
         fontName='Helvetica-Bold'
     )
     
-    normal_style = styles['Normal']
-    normal_style.fontSize = 10
-    normal_style.leading = 14
+    prescription_style = ParagraphStyle(
+        'Prescription',
+        parent=styles['Normal'],
+        fontSize=11,
+        leading=16,
+        textColor=colors.black,
+        fontName='Helvetica'
+    )
     
-    # Add title
-    title = Paragraph("MEDICAL RECORD", title_style)
-    elements.append(title)
-    elements.append(Spacer(1, 12))
+    small_text_style = ParagraphStyle(
+        'SmallText',
+        parent=styles['Normal'],
+        fontSize=9,
+        textColor=colors.HexColor('#64748b'),
+        fontName='Helvetica'
+    )
     
-    # Add hospital/clinic name
-    clinic_name = Paragraph("<b>SwasthyaCare Hospital</b>", 
-                           ParagraphStyle('Center', parent=normal_style, alignment=TA_CENTER))
-    elements.append(clinic_name)
-    elements.append(Spacer(1, 20))
+    # Add logo and hospital header
+    try:
+        from reportlab.platypus import Image
+        import os
+        from django.conf import settings
+        
+        logo_path = os.path.join(settings.BASE_DIR, 'static', 'hospital_logo.jpg')
+        if os.path.exists(logo_path):
+            logo = Image(logo_path, width=80, height=80)
+            logo.hAlign = 'CENTER'
+            elements.append(logo)
+            elements.append(Spacer(1, 5))  # Reduced spacing after logo
+    except:
+        pass  # If logo doesn't exist, continue without it
     
-    # Patient Information
-    elements.append(Paragraph("Patient Information", heading_style))
-    patient_data = [
-        ['Patient ID:', medical_record.patient.patient_id],
-        ['Name:', medical_record.patient.user.get_full_name()],
-        ['Date of Birth:', medical_record.patient.date_of_birth.strftime('%d %B %Y')],
-        ['Gender:', medical_record.patient.get_gender_display()],
-        ['Blood Group:', medical_record.patient.blood_group or 'N/A'],
-        ['Phone:', medical_record.patient.user.phone or 'N/A'],
-    ]
+    # Hospital name and details
+    hospital_name = Paragraph("<b>SWASTHYA CARE HOSPITAL</b>", header_style)
+    elements.append(hospital_name)
     
-    patient_table = Table(patient_data, colWidths=[2*inch, 4*inch])
-    patient_table.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (0, -1), colors.HexColor('#e0e7ff')),
+    hospital_details = Paragraph(
+        "Address: 123 Medical Street, Healthcare City<br/>Phone: +91 1234567890<br/>Email: info@swasthyacare.com",
+        subheader_style
+    )
+    elements.append(hospital_details)
+    
+    # Horizontal line
+    from reportlab.platypus import HRFlowable
+    elements.append(HRFlowable(width="100%", thickness=2, color=colors.HexColor('#1e3a8a'), 
+                               spaceAfter=10, spaceBefore=3))  # Reduced spacing
+    
+    # Prescription header - removed background color
+    prescription_header = Paragraph("<b>MEDICAL PRESCRIPTION</b>", 
+                                   ParagraphStyle('PrescHeader', parent=header_style, 
+                                                fontSize=16, alignment=TA_CENTER, 
+                                                textColor=colors.HexColor('#1e3a8a'),
+                                                spaceAfter=10))
+    elements.append(prescription_header)
+    
+    # Date and prescription number
+    date_info = Table([
+        ['Date:', medical_record.created_at.strftime('%d %B %Y')],
+        ['Prescription No:', f'RX-{medical_record.id:05d}']
+    ], colWidths=[1.5*inch, 3*inch])
+    date_info.setStyle(TableStyle([
+        ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
+        ('FONTNAME', (1, 0), (1, -1), 'Helvetica'),
+        ('FONTSIZE', (0, 0), (-1, -1), 10),
         ('TEXTCOLOR', (0, 0), (-1, -1), colors.black),
         ('ALIGN', (0, 0), (0, -1), 'LEFT'),
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+    ]))
+    elements.append(date_info)
+    elements.append(Spacer(1, 15))
+    
+    # Patient Information Box
+    patient_info_data = [
+        ['Patient Name:', medical_record.patient.user.get_full_name(), 'Patient ID:', medical_record.patient.patient_id],
+        ['Age/Gender:', f'{medical_record.patient.date_of_birth.strftime("%d/%m/%Y")} / {medical_record.patient.get_gender_display()}', 
+         'Blood Group:', medical_record.patient.blood_group or 'N/A'],
+        ['Phone:', medical_record.patient.user.phone or 'N/A', 'Email:', medical_record.patient.user.email or 'N/A']
+    ]
+    
+    patient_table = Table(patient_info_data, colWidths=[1.2*inch, 2.3*inch, 1.2*inch, 2.3*inch])
+    patient_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor('#f8fafc')),
+        ('TEXTCOLOR', (0, 0), (0, -1), colors.HexColor('#475569')),
+        ('TEXTCOLOR', (2, 0), (2, -1), colors.HexColor('#475569')),
         ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
-        ('FONTSIZE', (0, 0), (-1, -1), 10),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
-        ('TOPPADDING', (0, 0), (-1, -1), 8),
-        ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+        ('FONTNAME', (2, 0), (2, -1), 'Helvetica-Bold'),
+        ('FONTNAME', (1, 0), (1, -1), 'Helvetica'),
+        ('FONTNAME', (3, 0), (3, -1), 'Helvetica'),
+        ('FONTSIZE', (0, 0), (-1, -1), 9),
+        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#cbd5e1')),
+        ('TOPPADDING', (0, 0), (-1, -1), 6),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+        ('LEFTPADDING', (0, 0), (-1, -1), 8),
     ]))
     elements.append(patient_table)
-    elements.append(Spacer(1, 20))
+    elements.append(Spacer(1, 15))
     
-    # Doctor Information
-    elements.append(Paragraph("Doctor Information", heading_style))
-    doctor_data = [
-        ['Doctor:', f"Dr. {medical_record.doctor.user.get_full_name()}"],
-        ['Specialization:', medical_record.doctor.specialization],
-        ['Qualification:', medical_record.doctor.qualification],
-    ]
-    
-    doctor_table = Table(doctor_data, colWidths=[2*inch, 4*inch])
-    doctor_table.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (0, -1), colors.HexColor('#e0e7ff')),
-        ('TEXTCOLOR', (0, 0), (-1, -1), colors.black),
-        ('ALIGN', (0, 0), (0, -1), 'LEFT'),
-        ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
-        ('FONTSIZE', (0, 0), (-1, -1), 10),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
-        ('TOPPADDING', (0, 0), (-1, -1), 8),
-        ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
-    ]))
-    elements.append(doctor_table)
-    elements.append(Spacer(1, 20))
-    
-    # Appointment Information
-    elements.append(Paragraph("Appointment Details", heading_style))
-    appointment_data = [
-        ['Date:', medical_record.appointment.appointment_date.strftime('%d %B %Y')],
-        ['Time:', medical_record.appointment.appointment_time.strftime('%I:%M %p')],
-        ['Reason for Visit:', medical_record.appointment.reason],
-    ]
-    
-    appointment_table = Table(appointment_data, colWidths=[2*inch, 4*inch])
-    appointment_table.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (0, -1), colors.HexColor('#e0e7ff')),
-        ('TEXTCOLOR', (0, 0), (-1, -1), colors.black),
-        ('ALIGN', (0, 0), (0, -1), 'LEFT'),
-        ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
-        ('FONTSIZE', (0, 0), (-1, -1), 10),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
-        ('TOPPADDING', (0, 0), (-1, -1), 8),
-        ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
-    ]))
-    elements.append(appointment_table)
-    elements.append(Spacer(1, 20))
-    
-    # Medical Record Details
-    elements.append(Paragraph("Medical Record", heading_style))
-    
-    # Diagnosis
-    elements.append(Paragraph("<b>Diagnosis:</b>", normal_style))
+    # Diagnosis Section
+    elements.append(Paragraph("Clinical Diagnosis", section_heading_style))
     diagnosis_text = medical_record.diagnosis.replace('\n', '<br/>')
-    elements.append(Paragraph(diagnosis_text, normal_style))
-    elements.append(Spacer(1, 12))
+    elements.append(Paragraph(diagnosis_text, prescription_style))
+    elements.append(Spacer(1, 15))
     
-    # Prescription
-    elements.append(Paragraph("<b>Prescription:</b>", normal_style))
-    prescription_text = medical_record.prescription.replace('\n', '<br/>')
-    elements.append(Paragraph(prescription_text, normal_style))
-    elements.append(Spacer(1, 12))
+    # Rx Symbol and Prescription - removed symbol, using text only
+    elements.append(Paragraph("<b>Rx:</b>", section_heading_style))
+    elements.append(Spacer(1, 5))
     
-    # Additional Notes
+    # Format prescription with line breaks - don't add numbers if already numbered
+    prescription_lines = medical_record.prescription.split('\n')
+    formatted_lines = []
+    for line in prescription_lines:
+        line = line.strip()
+        if line:
+            # Check if line already starts with a number
+            if line[0].isdigit() and '. ' in line[:5]:
+                formatted_lines.append(line)  # Already numbered
+            else:
+                formatted_lines.append(line)  # Keep as is
+    prescription_html = '<br/>'.join(formatted_lines)
+    elements.append(Paragraph(prescription_html, prescription_style))
+    elements.append(Spacer(1, 15))
+    
+    # Additional Notes (if any)
     if medical_record.notes:
-        elements.append(Paragraph("<b>Additional Notes:</b>", normal_style))
+        elements.append(Paragraph("Additional Notes", section_heading_style))
         notes_text = medical_record.notes.replace('\n', '<br/>')
-        elements.append(Paragraph(notes_text, normal_style))
-        elements.append(Spacer(1, 12))
+        elements.append(Paragraph(notes_text, prescription_style))
+        elements.append(Spacer(1, 15))
     
-    # Record metadata
+    # Doctor Information Section (No Signature - Computer Generated)
     elements.append(Spacer(1, 20))
-    record_date = Paragraph(
-        f"<i>Record created on: {medical_record.created_at.strftime('%d %B %Y at %I:%M %p')}</i>",
-        ParagraphStyle('Small', parent=normal_style, fontSize=8, textColor=colors.grey)
+    
+    elements.append(Paragraph("Prescribed By:", section_heading_style))
+    doctor_info = Paragraph(
+        f"<b>Dr. {medical_record.doctor.user.get_full_name()}</b><br/>"
+        f"{medical_record.doctor.specialization}<br/>"
+        f"{medical_record.doctor.qualification}",
+        prescription_style
     )
-    elements.append(record_date)
+    elements.append(doctor_info)
+    elements.append(Spacer(1, 15))
+    
+    # Computer Generated Notice
+    computer_notice = Paragraph(
+        "<i>*** This is a computer-generated prescription and does not require a physical signature ***</i>",
+        ParagraphStyle('Notice', parent=small_text_style, alignment=TA_CENTER, 
+                      textColor=colors.HexColor('#475569'), fontSize=9)
+    )
+    elements.append(computer_notice)
+    
+    # Footer
+    elements.append(Spacer(1, 20))
+    elements.append(HRFlowable(width="100%", thickness=1, color=colors.HexColor('#cbd5e1')))
+    footer_text = Paragraph(
+        f"<i>This is a computer-generated prescription. Generated on {medical_record.created_at.strftime('%d %B %Y at %I:%M %p')}</i>",
+        small_text_style
+    )
+    elements.append(Spacer(1, 5))
+    elements.append(footer_text)
     
     # Build PDF
     doc.build(elements)
@@ -1098,8 +1177,9 @@ def download_medical_record_pdf(request, record_id):
     buffer.close()
     
     response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = f'attachment; filename="medical_record_{medical_record.patient.patient_id}_{medical_record.created_at.strftime("%Y%m%d")}.pdf"'
+    response['Content-Disposition'] = f'attachment; filename="prescription_{medical_record.patient.patient_id}_{medical_record.created_at.strftime("%Y%m%d")}.pdf"'
     response.write(pdf)
     
     return response
+
 
