@@ -1,8 +1,4 @@
-{% extends 'base.html' %}
 
-{% block title %}Notifications - SwasthyaCare{% endblock %}
-
-{% block content %}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -212,7 +208,7 @@
 
     <div class="user-section">
         <span class="user-info">{{ request.user.get_full_name }} (Doctor)</span>
-        <a href="{% url 'logout' %}">
+        <a href="{% url 'hospital:logout' %}">
             <button class="logout-btn">Logout</button>
         </a>
     </div>
@@ -271,4 +267,4 @@
 
 </body>
 </html>
-{% endblock %}
+
