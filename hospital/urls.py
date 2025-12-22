@@ -46,4 +46,10 @@ urlpatterns = [
     # Notification URLs (accessible to all logged-in users)
     path('notifications/', views.view_notifications, name='view_notifications'),
     path('notifications/<int:notification_id>/mark-read/', views.mark_notification_read, name='mark_notification_read'),
+    
+    # Admin Panel URLs (using 'panel' prefix to avoid conflict with Django admin)
+    path('panel/dashboard/', views.admin_dashboard, name='admin_dashboard'),
+    path('panel/create-doctor/', views.create_doctor, name='create_doctor'),
+    path('panel/create-receptionist/', views.create_receptionist, name='create_receptionist'),
+    path('panel/delete-user/<int:user_id>/', views.delete_user, name='delete_user'),
 ]

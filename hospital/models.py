@@ -10,6 +10,7 @@ class CustomUser(AbstractUser):
         ('DOCTOR', 'Doctor'),
         ('RECEPTIONIST', 'Receptionist'),
         ('PATIENT', 'Patient'),
+        ('ADMIN', 'Admin'),
         ('SUPERUSER', 'Superuser'),
     ]
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='PATIENT')

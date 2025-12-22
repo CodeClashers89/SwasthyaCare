@@ -292,3 +292,64 @@ class AppointmentRescheduleFormSingle(forms.Form):
         
         return cleaned_data
 
+
+class DoctorRegistrationForm(forms.ModelForm):
+    """Form for creating doctor users by admin"""
+    first_name = forms.CharField(max_length=100, required=True)
+    last_name = forms.CharField(max_length=100, required=True)
+    email = forms.EmailField(required=True)
+    username = forms.CharField(max_length=150, required=True)
+    password = forms.CharField(widget=forms.PasswordInput, required=True)
+    phone = forms.CharField(max_length=15, required=False)
+    
+    # Doctor profile fields
+    specialization = forms.CharField(max_length=100, required=True)
+    qualification = forms.CharField(max_length=200, required=True)
+    experience_years = forms.IntegerField(min_value=0, required=True)
+    consultation_fee = forms.DecimalField(max_digits=10, decimal_places=2, required=True)
+    
+    class Meta:
+        model = Doctor
+        fields = ['specialization', 'qualification', 'experience_years', 'consultation_fee']
+    
+    def save(self, commit=True):
+        # Create user first
+        user = CustomUser.objects.create_user(
+            username=self.cleaned_data['username'],
+            email=self.cleaned_data['email'],
+            password=self.cleaned_data['password'],
+            first_name=self.cleaned_data['first_name'],
+            last_name=self.cleaned_data['last_name'],
+            phone=self.cleaned_data.get('phone', ''),
+            role='DOCTOR'
+        )
+        
+        # Create doctor profile
+        doctor = super().save(commit=False)
+        doctor.user = user
+        if commit:
+            doctor.save()
+        return doctor
+
+
+class ReceptionistRegistrationForm(forms.Form):
+    """Form for creating receptionist users by admin"""
+    first_name = forms.CharField(max_length=100, required=True)
+    last_name = forms.CharField(max_length=100, required=True)
+    email = forms.EmailField(required=True)
+    username = forms.CharField(max_length=150, required=True)
+    password = forms.CharField(widget=forms.PasswordInput, required=True)
+    phone = forms.CharField(max_length=15, required=False)
+    
+    def save(self, commit=True):
+        # Create receptionist user
+        user = CustomUser.objects.create_user(
+            username=self.cleaned_data['username'],
+            email=self.cleaned_data['email'],
+            password=self.cleaned_data['password'],
+            first_name=self.cleaned_data['first_name'],
+            last_name=self.cleaned_data['last_name'],
+            phone=self.cleaned_data.get('phone', ''),
+            role='RECEPTIONIST'
+        )
+        return user

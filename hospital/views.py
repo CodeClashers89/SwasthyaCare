@@ -8,7 +8,8 @@ from .models import (CustomUser, Patient, Doctor, Appointment, MedicalRecord,
                      DoctorAvailability, UrgentSurgery, Notification, AppointmentReschedule)
 from .forms import (PatientRegistrationForm, AppointmentForm, MedicalRecordForm, 
                     DoctorAvailabilityForm, RescheduleAppointmentForm, FollowUpAppointmentForm,
-                    UrgentSurgeryForm, SurgeryApprovalForm, AppointmentRescheduleFormSingle)
+                    UrgentSurgeryForm, SurgeryApprovalForm, AppointmentRescheduleFormSingle,
+                    DoctorRegistrationForm, ReceptionistRegistrationForm)
 from .decorators import role_required
 from django.db import IntegrityError
 
@@ -54,10 +55,13 @@ def home_view(request):
         return redirect('hospital:receptionist_dashboard')
     elif request.user.role == 'PATIENT':
         return redirect('hospital:patient_dashboard')
+    elif request.user.role == 'ADMIN':
+        return redirect('hospital:admin_dashboard')
     elif request.user.is_superuser:
         return redirect('/admin/')
     else:
         return render(request, 'hospital/home.html')
+
 
 
 # Doctor Views
@@ -1340,4 +1344,96 @@ def download_medical_record_pdf(request, record_id):
     
     return response
 
+
+# Admin Panel Views
+@login_required
+@role_required('ADMIN')
+def admin_dashboard(request):
+    """Admin dashboard with navigation to create doctors and receptionists"""
+    # Get statistics
+    total_doctors = Doctor.objects.count()
+    total_receptionists = CustomUser.objects.filter(role='RECEPTIONIST').count()
+    total_patients = Patient.objects.count()
+    total_appointments = Appointment.objects.count()
+    
+    # Get user lists
+    doctors = Doctor.objects.all().select_related('user').order_by('user__first_name')
+    receptionists = CustomUser.objects.filter(role='RECEPTIONIST').order_by('first_name')
+    
+    context = {
+        'total_doctors': total_doctors,
+        'total_receptionists': total_receptionists,
+        'total_patients': total_patients,
+        'total_appointments': total_appointments,
+        'doctors': doctors,
+        'receptionists': receptionists,
+    }
+    return render(request, 'hospital/admin/admin_dashboard.html', context)
+
+
+@login_required
+@role_required('ADMIN')
+def create_doctor(request):
+    """Create new doctor user"""
+    if request.method == 'POST':
+        form = DoctorRegistrationForm(request.POST)
+        if form.is_valid():
+            try:
+                doctor = form.save()
+                messages.success(request, f'Doctor {doctor.user.get_full_name()} created successfully!')
+                return redirect('hospital:admin_dashboard')
+            except IntegrityError:
+                messages.error(request, 'Username already exists. Please choose a different username.')
+    else:
+        form = DoctorRegistrationForm()
+    
+    context = {'form': form}
+    return render(request, 'hospital/admin/create_doctor.html', context)
+
+
+@login_required
+@role_required('ADMIN')
+def create_receptionist(request):
+    """Create new receptionist user"""
+    if request.method == 'POST':
+        form = ReceptionistRegistrationForm(request.POST)
+        if form.is_valid():
+            try:
+                user = form.save()
+                messages.success(request, f'Receptionist {user.get_full_name()} created successfully!')
+                return redirect('hospital:admin_dashboard')
+            except IntegrityError:
+                messages.error(request, 'Username already exists. Please choose a different username.')
+    else:
+        form = ReceptionistRegistrationForm()
+    
+    context = {'form': form}
+    return render(request, 'hospital/admin/create_receptionist.html', context)
+
+
+@login_required
+@role_required('ADMIN')
+def delete_user(request, user_id):
+    """Delete a doctor or receptionist user"""
+    user = get_object_or_404(CustomUser, id=user_id)
+    
+    # Prevent deleting admin users
+    if user.role == 'ADMIN':
+        messages.error(request, 'Cannot delete admin users.')
+        return redirect('hospital:admin_dashboard')
+    
+    # Prevent deleting patients
+    if user.role == 'PATIENT':
+        messages.error(request, 'Cannot delete patients from this panel.')
+        return redirect('hospital:admin_dashboard')
+    
+    # Only allow deleting doctors and receptionists
+    if user.role not in ['DOCTOR', 'RECEPTIONIST']:
+        messages.error(request, 'Invalid user type.')
+        return redirect('hospital:admin_dashboard')
+    
+    username = user.get_full_name()
+    user.delete()
+    messages.success(request, f'User {username} deleted successfully.')
+    return redirect('hospital:admin_dashboard')
 

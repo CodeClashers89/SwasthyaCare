@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard - SwasthyaCare</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Google Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', 'Inter', sans-serif;
+            background-color: #e6fff7;
+            min-height: 100vh;
+        }
+
+        /* NAVBAR */
+        .navbar {
+            background-color: #64cbab;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 50px;
+            color: white;
+        }
+
+        .navbar-brand {
+            font-size: 28px;
+            font-weight: 600;
+        }
+
+        .navbar-right {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .btn-logout {
+            background-color: #ef4444;
+            padding: 8px 18px;
+            border-radius: 8px;
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        /* MAIN */
+        .main-content {
+            padding: 40px 60px;
+            max-width: 1400px;
+            margin: auto;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .page-title {
+            font-size: 42px;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .page-subtitle {
+            font-size: 18px;
+            color: #666;
+        }
+
+        /* ALERTS */
+        .alert {
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .alert-success {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+
+        .alert-error {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+
+        /* STATS GRID */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            border-left: 5px solid #64cbab;
+        }
+
+        .stat-number {
+            font-size: 48px;
+            font-weight: 700;
+            color: #64cbab;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+
+        /* ACTION CARDS */
+        .action-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .action-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .action-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+        }
+
+        .action-icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+        }
+
+        .action-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .action-description {
+            color: #666;
+            margin-bottom: 25px;
+        }
+
+        /* USER LISTS */
+        .user-section {
+            margin-top: 50px;
+        }
+
+        .section-title {
+            font-size: 28px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+
+        .card-header {
+            background-color: #9ac2ea;
+            padding: 20px 30px;
+            color: white;
+            font-size: 22px;
+            font-weight: 600;
+        }
+
+        .card-body {
+            padding: 25px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 14px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f8f9fa;
+            font-size: 14px;
+            text-transform: uppercase;
+        }
+
+        tbody tr:hover {
+            background-color: #f9fafb;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 0;
+            color: #888;
+        }
+
+        /* BUTTONS */
+        .btn {
+            padding: 12px 30px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-block;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background-color: #7aa7df;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #6b9ad9;
+        }
+
+        .btn-success {
+            background-color: #64cbab;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: #5ac6a2;
+        }
+
+        .btn-danger {
+            background-color: #ef4444;
+            color: white;
+            padding: 8px 16px;
+            font-size: 14px;
+        }
+
+        .btn-danger:hover {
+            background-color: #dc2626;
+        }
+
+        @media (max-width: 900px) {
+            .main-content {
+                padding: 20px;
+            }
+
+            .stats-grid,
+            .action-grid {
+                grid-template-columns: 1fr;
+            }
+
+            table {
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="navbar">
+        <div class="navbar-brand">SwasthyaCare Admin</div>
+        <div class="navbar-right">
+            <span>{{ request.user.get_full_name }}</span>
+            <a href="{% url 'hospital:logout' %}" class="btn-logout">Logout</a>
+        </div>
+    </nav>
+
+    <!-- MAIN -->
+    <main class="main-content">
+
+        <div class="page-header">
+            <h1 class="page-title">Admin Dashboard</h1>
+            <p class="page-subtitle">Manage doctors and receptionists</p>
+        </div>
+
+        <!-- Django Messages -->
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+            {{ message }}
+        </div>
+        {% endfor %}
+        {% endif %}
+
+        <!-- STATISTICS -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number">{{ total_doctors }}</div>
+                <div class="stat-label">Total Doctors</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">{{ total_receptionists }}</div>
+                <div class="stat-label">Total Receptionists</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">{{ total_patients }}</div>
+                <div class="stat-label">Total Patients</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">{{ total_appointments }}</div>
+                <div class="stat-label">Total Appointments</div>
+            </div>
+        </div>
+
+        <!-- ACTION CARDS -->
+        <div class="action-grid">
+            <div class="action-card">
+                <div class="action-icon">👨‍⚕️</div>
+                <h2 class="action-title">Create Doctor</h2>
+                <p class="action-description">Add a new doctor to the system with all required credentials and profile
+                    information.</p>
+                <a href="{% url 'hospital:create_doctor' %}" class="btn btn-primary">Create Doctor</a>
+            </div>
+
+            <div class="action-card">
+                <div class="action-icon">👩‍💼</div>
+                <h2 class="action-title">Create Receptionist</h2>
+                <p class="action-description">Add a new receptionist to the system with login credentials.</p>
+                <a href="{% url 'hospital:create_receptionist' %}" class="btn btn-success">Create Receptionist</a>
+            </div>
+        </div>
+
+        <!-- USER LISTS -->
+        <div class="user-section">
+            <h2 class="section-title">Current Users</h2>
+
+            <!-- DOCTORS LIST -->
+            <div class="card">
+                <div class="card-header">Doctors ({{ total_doctors }})</div>
+                <div class="card-body">
+                    {% if doctors %}
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Specialization</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for doctor in doctors %}
+                            <tr>
+                                <td><strong>Dr. {{ doctor.user.get_full_name }}</strong></td>
+                                <td>{{ doctor.specialization }}</td>
+                                <td>{{ doctor.user.email }}</td>
+                                <td>{{ doctor.user.phone|default:"N/A" }}</td>
+                                <td>
+                                    <a href="{% url 'hospital:delete_user' doctor.user.id %}" class="btn btn-danger"
+                                        onclick="return confirm('Are you sure you want to delete Dr. {{ doctor.user.get_full_name }}? This action cannot be undone.');">
+                                        Delete
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% else %}
+                    <div class="empty-state">👨‍⚕️ No doctors in the system</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- RECEPTIONISTS LIST -->
+            <div class="card">
+                <div class="card-header">Receptionists ({{ total_receptionists }})</div>
+                <div class="card-body">
+                    {% if receptionists %}
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Username</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for receptionist in receptionists %}
+                            <tr>
+                                <td><strong>{{ receptionist.get_full_name }}</strong></td>
+                                <td>{{ receptionist.username }}</td>
+                                <td>{{ receptionist.email }}</td>
+                                <td>{{ receptionist.phone|default:"N/A" }}</td>
+                                <td>
+                                    <a href="{% url 'hospital:delete_user' receptionist.id %}" class="btn btn-danger"
+                                        onclick="return confirm('Are you sure you want to delete {{ receptionist.get_full_name }}? This action cannot be undone.');">
+                                        Delete
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% else %}
+                    <div class="empty-state">👩‍💼 No receptionists in the system</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+</body>
+
+</html>
