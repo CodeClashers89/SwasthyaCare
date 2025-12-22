@@ -1,1 +1,1 @@
-web: gunicorn SwasthyaCare.wsgi
+web: gunicorn SwasthyaCare.wsgi --timeout 120
