@@ -963,19 +963,16 @@ def bulk_reschedule_appointments(request, surgery_id):
                     related_appointment=appointment
                 )
                 
-                # Send email notification to patient (with timeout to prevent worker hangs)
+                # Send email notification to patient
                 try:
-                    from django.core.mail import EmailMultiAlternatives, get_connection
+                    from django.core.mail import EmailMultiAlternatives
                     from django.template.loader import render_to_string
                     from django.conf import settings
-                    import socket
                     
                     patient_email = appointment.patient.user.email
                     
                     if patient_email:
                         # Prepare email context
-                        # Note: We need to get original date/time from the reschedule record we just created
-                        # because the appointment object has already been updated with new date/time
                         reschedule_record = AppointmentReschedule.objects.filter(appointment=appointment).latest('created_at')
                         
                         email_context = {
@@ -992,30 +989,18 @@ def bulk_reschedule_appointments(request, surgery_id):
                         # Render HTML email
                         html_content = render_to_string('hospital/emails/appointment_rescheduled.html', email_context)
                         
-                        # Create email
+                        # Send email via Brevo SMTP
                         subject = 'Your Appointment Has Been Rescheduled - SwasthyaCare'
-                        from_email = settings.DEFAULT_FROM_EMAIL
-                        to_email = [patient_email]
-                        
-                        # Create connection with timeout (60s as requested)
-                        connection = get_connection(
-                            timeout=60  # 60 second timeout
-                        )
-                        
-                        # Create email message with HTML
                         email = EmailMultiAlternatives(
                             subject=subject,
                             body=f"Dear {email_context['patient_name']},\n\nYour appointment has been rescheduled. Please see the details in the HTML version of this email.",
-                            from_email=from_email,
-                            to=to_email,
-                            connection=connection
+                            from_email=settings.DEFAULT_FROM_EMAIL,
+                            to=[patient_email]
                         )
                         email.attach_alternative(html_content, "text/html")
-                        
-                        # Send email with timeout protection
                         email.send(fail_silently=True)
                         
-                except (socket.timeout, socket.error, Exception) as e:
+                except Exception as e:
                     # Log error but don't block the reschedule process
                     import logging
                     logger = logging.getLogger(__name__)

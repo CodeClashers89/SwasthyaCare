@@ -47,19 +47,14 @@ class Command(BaseCommand):
                 html_message = render_to_string('hospital/email/appointment_reminder.html', context)
                 plain_message = strip_tags(html_message)
                 
-                
-                # Send email with timeout (60s as requested)
-                from django.core.mail import get_connection
-                connection = get_connection(timeout=60)  # 60 second timeout
-                
+                # Send email via Brevo SMTP
                 send_mail(
                     subject,
                     plain_message,
                     settings.DEFAULT_FROM_EMAIL,
                     [appointment.patient.user.email],
                     fail_silently=False,
-                    html_message=html_message,
-                    connection=connection
+                    html_message=html_message
                 )
                 
                 success_count += 1

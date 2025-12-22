@@ -25,7 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('SECRET_KEY',"your-default-secret-key")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True  # Set to False in production (Render will override this)
 
 ALLOWED_HOSTS = ["*", ".onrender.com", 'localhost', '127.0.0.1']
 
@@ -139,19 +139,17 @@ LOGIN_REDIRECT_URL = 'hospital:home'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-# Email Configuration (SendGrid)
+# Email Configuration (Brevo SMTP)
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.sendgrid.net'
+EMAIL_HOST = 'smtp-relay.brevo.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'apikey'  # This is always 'apikey' for SendGrid
-EMAIL_HOST_PASSWORD = os.environ.get("SENDGRID_API_KEY", "")  # Your SendGrid API key
-DEFAULT_FROM_EMAIL = os.environ.get("SENDGRID_FROM_EMAIL", "noreply@example.com")  # Your verified sender email
+EMAIL_HOST_USER = os.environ.get("BREVO_SMTP_USER")  # Your Brevo login email
+EMAIL_HOST_PASSWORD = os.environ.get("BREVO_SMTP_PASSWORD")  # Your Brevo SMTP key
+DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL")
 
 # Validate email configuration
-if not EMAIL_HOST_PASSWORD:
+if not EMAIL_HOST_PASSWORD and not DEBUG:
     import warnings
-    warnings.warn("SENDGRID_API_KEY environment variable is not set. Emails will fail to send.")
-    # Fallback to console backend for development
-    if DEBUG:
-        EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+    warnings.warn("BREVO_SMTP_PASSWORD environment variable is not set. Emails will fail to send in production.")
+
