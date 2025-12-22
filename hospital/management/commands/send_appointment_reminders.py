@@ -48,9 +48,9 @@ class Command(BaseCommand):
                 plain_message = strip_tags(html_message)
                 
                 
-                # Send email with timeout to prevent hanging
+                # Send email with timeout (60s as requested)
                 from django.core.mail import get_connection
-                connection = get_connection(timeout=10)  # 10 second timeout
+                connection = get_connection(timeout=60)  # 60 second timeout
                 
                 send_mail(
                     subject,

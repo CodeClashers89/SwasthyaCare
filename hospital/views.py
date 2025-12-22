@@ -997,9 +997,9 @@ def bulk_reschedule_appointments(request, surgery_id):
                         from_email = settings.DEFAULT_FROM_EMAIL
                         to_email = [patient_email]
                         
-                        # Create connection with timeout to prevent worker hangs
+                        # Create connection with timeout (60s as requested)
                         connection = get_connection(
-                            timeout=10  # 10 second timeout
+                            timeout=60  # 60 second timeout
                         )
                         
                         # Create email message with HTML

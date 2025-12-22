@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>Bulk Reschedule Appointments | SwasthyaCare</title>
@@ -81,7 +82,7 @@
             background: white;
             padding: 25px;
             border-radius: 15px;
-            box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
             margin-bottom: 25px;
         }
 
@@ -96,7 +97,7 @@
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 20px;
-            background: rgba(211,255,240,0.5);
+            background: rgba(211, 255, 240, 0.5);
             padding: 15px;
             border-radius: 10px;
         }
@@ -186,12 +187,15 @@
             .container {
                 width: 95%;
             }
+
             .grid-3 {
                 grid-template-columns: 1fr;
             }
+
             .button-group {
                 flex-direction: column;
             }
+
             .btn {
                 width: 100%;
             }
@@ -201,111 +205,164 @@
 
 <body>
 
-<!-- NAVBAR -->
-<nav class="navbar">
+    <!-- NAVBAR -->
+    <nav class="navbar">
         <div class="navbar-brand">SwasthyaCare</div>
     </nav>
 
-<div class="container">
+    <div class="container">
 
-    <!-- PAGE HEADER -->
-    <h1 class="page-title">Reschedule Conflicting Appointments</h1>
-    <p class="page-subtitle">
-        The following appointments conflict with the surgery schedule.
-    </p>
+        <!-- PAGE HEADER -->
+        <h1 class="page-title">Reschedule Conflicting Appointments</h1>
+        <p class="page-subtitle">
+            The following appointments conflict with the surgery schedule.
+        </p>
 
-    <!-- SURGERY INFO -->
-    <div class="card">
-        <div class="card-header">Surgery Information</div>
-        <div class="grid-3">
-            <div>
-                <div class="label">Surgery Type</div>
-                <div class="value">{{ surgery.surgery_type }}</div>
-            </div>
-            <div>
-                <div class="label">Date</div>
-                <div class="value">{{ surgery.surgery_date }}</div>
-            </div>
-            <div>
-                <div class="label">Time</div>
-                <div class="value">
-                    {{ surgery.start_time|time:"h:i A" }} –
-                    {{ surgery.end_time|time:"h:i A" }}
+        <!-- SURGERY INFO -->
+        <div class="card">
+            <div class="card-header">Surgery Information</div>
+            <div class="grid-3">
+                <div>
+                    <div class="label">Surgery Type</div>
+                    <div class="value">{{ surgery.surgery_type }}</div>
+                </div>
+                <div>
+                    <div class="label">Date</div>
+                    <div class="value">{{ surgery.surgery_date }}</div>
+                </div>
+                <div>
+                    <div class="label">Time</div>
+                    <div class="value">
+                        {{ surgery.start_time|time:"h:i A" }} –
+                        {{ surgery.end_time|time:"h:i A" }}
+                    </div>
                 </div>
             </div>
         </div>
+
+        <!-- FORM -->
+        <form method="post">
+            {% csrf_token %}
+
+            <div class="card">
+                <div class="card-header">
+                    Appointments to Reschedule ({{ forms|length }})
+                </div>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Patient</th>
+                            <th>Original Date & Time</th>
+                            <th>Reason</th>
+                            <th>New Date</th>
+                            <th>New Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in forms %}
+                        <tr>
+                            <td>
+                                <strong>{{ item.appointment.patient.patient_id }}</strong><br>
+                                {{ item.appointment.patient.user.get_full_name }}
+                            </td>
+                            <td>
+                                {{ item.appointment.appointment_date }}<br>
+                                <small>{{ item.appointment.appointment_time|time:"h:i A" }}</small>
+                            </td>
+                            <td>
+                                {{ item.appointment.reason|truncatewords:8 }}
+                            </td>
+                            <td>
+                                {{ item.form.new_date }}
+                                {% if item.form.new_date.errors %}
+                                <div class="error-message">
+                                    {{ item.form.new_date.errors }}
+                                </div>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {{ item.form.new_time }}
+                                {% if item.form.new_time.errors %}
+                                <div class="error-message">
+                                    {{ item.form.new_time.errors }}
+                                </div>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+                <div class="info-box">
+                    ℹ️ Patients will be automatically notified after rescheduling.
+                </div>
+
+                <div class="button-group">
+                    <a href="{% url 'hospital:doctor_dashboard' %}" class="btn btn-secondary">
+                        Cancel
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        Reschedule All Appointments
+                    </button>
+                </div>
+            </div>
+        </form>
+
     </div>
 
-    <!-- FORM -->
-    <form method="post">
-        {% csrf_token %}
-
-        <div class="card">
-            <div class="card-header">
-                Appointments to Reschedule ({{ forms|length }})
-            </div>
-
-            <table>
-                <thead>
-                    <tr>
-                        <th>Patient</th>
-                        <th>Original Date & Time</th>
-                        <th>Reason</th>
-                        <th>New Date</th>
-                        <th>New Time</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for item in forms %}
-                    <tr>
-                        <td>
-                            <strong>{{ item.appointment.patient.patient_id }}</strong><br>
-                            {{ item.appointment.patient.user.get_full_name }}
-                        </td>
-                        <td>
-                            {{ item.appointment.appointment_date }}<br>
-                            <small>{{ item.appointment.appointment_time|time:"h:i A" }}</small>
-                        </td>
-                        <td>
-                            {{ item.appointment.reason|truncatewords:8 }}
-                        </td>
-                        <td>
-                            {{ item.form.new_date }}
-                            {% if item.form.new_date.errors %}
-                            <div class="error-message">
-                                {{ item.form.new_date.errors }}
-                            </div>
-                            {% endif %}
-                        </td>
-                        <td>
-                            {{ item.form.new_time }}
-                            {% if item.form.new_time.errors %}
-                            <div class="error-message">
-                                {{ item.form.new_time.errors }}
-                            </div>
-                            {% endif %}
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-
-            <div class="info-box">
-                ℹ️ Patients will be automatically notified after rescheduling.
-            </div>
-
-            <div class="button-group">
-                <a href="{% url 'hospital:doctor_dashboard' %}" class="btn btn-secondary">
-                    Cancel
-                </a>
-                <button type="submit" class="btn btn-primary">
-                    Reschedule All Appointments
-                </button>
+    <!-- LOADING OVERLAY -->
+    <div id="loadingOverlay"
+        style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.9); z-index: 9999; flex-direction: column; align-items: center; justify-content: center;">
+        <div style="position: relative; width: 150px; height: 150px;">
+            <img src="/static/images/preview.jpeg"
+                style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%; box-shadow: 0 4px 15px rgba(0,0,0,0.2); animation: pulse 1.5s infinite;">
+            <div
+                style="position: absolute; top: -10px; left: -10px; right: -10px; bottom: -10px; border: 4px solid #64cbab; border-top: 4px solid transparent; border-radius: 50%; animation: spin 1s linear infinite;">
             </div>
         </div>
-    </form>
+        <h3 style="margin-top: 20px; color: #333; font-family: 'Poppins', sans-serif;">Processing...</h3>
+        <p style="color: #666; font-size: 14px;">Sending emails to patients, please do not close this window.</p>
+    </div>
 
-</div>
+    <style>
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(0.95);
+                opacity: 0.9;
+            }
+
+            50% {
+                transform: scale(1.05);
+                opacity: 1;
+            }
+
+            100% {
+                transform: scale(0.95);
+                opacity: 0.9;
+            }
+        }
+    </style>
+
+    <script>
+        document.querySelector('form').addEventListener('submit', function () {
+            document.getElementById('loadingOverlay').style.display = 'flex';
+            // Disable submit button to prevent double submission
+            this.querySelector('button[type="submit"]').disabled = true;
+            this.querySelector('button[type="submit"]').innerText = 'Processing...';
+        });
+    </script>
 
 </body>
+
 </html>
