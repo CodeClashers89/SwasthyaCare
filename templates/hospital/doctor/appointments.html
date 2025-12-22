@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>My Appointments - SwasthyaCare</title>
@@ -83,7 +84,7 @@
             background: white;
             border-radius: 20px;
             padding: 30px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
         }
 
         /* FILTERS */
@@ -105,10 +106,21 @@
             font-size: 14px;
         }
 
-        .btn-all { background: #7aa7df; }
-        .btn-scheduled { background: #64cbab; }
-        .btn-completed { background: #60a5fa; }
-        .btn-noshow { background: #b5b5b5; }
+        .btn-all {
+            background: #7aa7df;
+        }
+
+        .btn-scheduled {
+            background: #64cbab;
+        }
+
+        .btn-completed {
+            background: #60a5fa;
+        }
+
+        .btn-noshow {
+            background: #b5b5b5;
+        }
 
         /* TABLE */
         table {
@@ -121,7 +133,8 @@
             color: white;
         }
 
-        th, td {
+        th,
+        td {
             padding: 18px;
             text-align: left;
             vertical-align: top;
@@ -140,9 +153,20 @@
             display: inline-block;
         }
 
-        .scheduled { background: #d1fae5; color: #10b981; }
-        .completed { background: #dbeafe; color: #3b82f6; }
-        .no_show { background: #e5e7eb; color: #6b7280; }
+        .scheduled {
+            background: #d1fae5;
+            color: #10b981;
+        }
+
+        .completed {
+            background: #dbeafe;
+            color: #3b82f6;
+        }
+
+        .no_show {
+            background: #e5e7eb;
+            color: #6b7280;
+        }
 
         /* ACTIONS */
         .action-buttons {
@@ -161,11 +185,25 @@
             text-decoration: none;
         }
 
-        .btn-history { background: #7aa7df; }
-        .btn-add { background: #64cbab; }
-        .btn-complete { background: #10b981; }
-        .btn-noshow-action { background: #b5b5b5; }
-        .btn-follow { background: #60a5fa; }
+        .btn-history {
+            background: #7aa7df;
+        }
+
+        .btn-add {
+            background: #64cbab;
+        }
+
+        .btn-complete {
+            background: #10b981;
+        }
+
+        .btn-noshow-action {
+            background: #b5b5b5;
+        }
+
+        .btn-follow {
+            background: #60a5fa;
+        }
 
         .empty-state {
             text-align: center;
@@ -177,102 +215,101 @@
 
 <body>
 
-<!-- NAVBAR -->
-<nav class="navbar">
-    <div class="navbar-brand">SwasthyaCare</div>
-    <div class="navbar-center">
-        <a href="{% url 'hospital:doctor_dashboard' %}">Dashboard</a>
-        <a href="{% url 'hospital:doctor_appointments' %}">Appointments</a>
-        <a href="{% url 'hospital:view_surgeries' %}">Surgeries</a>
-        <a href="{% url 'hospital:manage_availability' %}">Availability</a>
-    </div>
-    <div class="navbar-right">
-        <span>{{ doctor.user.get_full_name }}</span>
-        <a href="{% url 'hospital:logout' %}" class="btn-logout">Logout</a>
-    </div>
-</nav>
+    <!-- NAVBAR -->
+    <nav class="navbar">
+        <div class="navbar-brand">SwasthyaCare</div>
+        <div class="navbar-center">
+            <a href="{% url 'hospital:doctor_dashboard' %}">Dashboard</a>
+            <a href="{% url 'hospital:doctor_appointments' %}">Appointments</a>
+            <a href="{% url 'hospital:view_surgeries' %}">Surgeries</a>
+            <a href="{% url 'hospital:manage_availability' %}">Availability</a>
+        </div>
+        <div class="navbar-right">
+            <span>{{ doctor.user.get_full_name }}</span>
+            <a href="{% url 'hospital:logout' %}" class="btn-logout">Logout</a>
+        </div>
+    </nav>
 
-<!-- CONTENT -->
-<main class="main-content">
-    <h1 class="page-title">My Appointments</h1>
-    <p class="page-subtitle">Manage your patient appointments</p>
+    <!-- CONTENT -->
+    <main class="main-content">
+        <h1 class="page-title">My Appointments</h1>
+        <p class="page-subtitle">Manage your patient appointments</p>
 
-    <div class="appointment-card">
-        <div class="filter-section">
-            <strong>Filter Appointments</strong>
-            <div class="filter-buttons">
-                <a href="?status=all" class="btn-all">All</a>
-                <a href="?status=scheduled" class="btn-scheduled">Scheduled</a>
-                <a href="?status=completed" class="btn-completed">Completed</a>
-                <a href="?status=no_show" class="btn-noshow">No Show</a>
+        <div class="appointment-card">
+            <div class="filter-section">
+                <strong>Filter Appointments</strong>
+                <div class="filter-buttons">
+                    <a href="?status=all" class="btn-all">All</a>
+                    <a href="?status=scheduled" class="btn-scheduled">Scheduled</a>
+                    <a href="?status=completed" class="btn-completed">Completed</a>
+                    <a href="?status=no_show" class="btn-noshow">No Show</a>
+                </div>
             </div>
-        </div>
 
-        {% if appointments %}
-        <table>
-            <thead>
-                <tr>
-                    <th>Date & Time</th>
-                    <th>Patient</th>
-                    <th>Reason</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-            {% for appointment in appointments %}
-                <tr>
-                    <td>
-                        <strong>{{ appointment.appointment_date }}</strong><br>
-                        {{ appointment.appointment_time|time:"h:i A" }}
-                    </td>
-                    <td>
-                        <strong>{{ appointment.patient.patient_id }}</strong><br>
-                        {{ appointment.patient.user.get_full_name }}
-                    </td>
-                    <td>{{ appointment.reason|truncatewords:15 }}</td>
-                    <td>
-                        <span class="status-badge {{ appointment.status|lower }}">
-                            {{ appointment.get_status_display }}
-                        </span>
-                        {% if appointment.is_follow_up %}
+            {% if appointments %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date & Time</th>
+                        <th>Patient</th>
+                        <th>Reason</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for appointment in appointments %}
+                    <tr>
+                        <td>
+                            <strong>{{ appointment.appointment_date }}</strong><br>
+                            {{ appointment.appointment_time|time:"h:i A" }}
+                        </td>
+                        <td>
+                            <strong>{{ appointment.patient.patient_id }}</strong><br>
+                            {{ appointment.patient.user.get_full_name }}
+                        </td>
+                        <td>{{ appointment.reason|truncatewords:15 }}</td>
+                        <td>
+                            <span class="status-badge {{ appointment.status|lower }}">
+                                {{ appointment.get_status_display }}
+                            </span>
+                            {% if appointment.is_follow_up %}
                             <span class="status-badge completed">Follow-up</span>
-                        {% endif %}
-                    </td>
-                    <td>
-                        <div class="action-buttons">
-                            <a href="{% url 'hospital:patient_history' appointment.patient.id %}" class="action-btn btn-history">History</a>
-
-                            {% if appointment.status == 'SCHEDULED' %}
-                            <a href="{% url 'hospital:add_medical_record' appointment.id %}" class="action-btn btn-add">Add Record</a>
-
-                            <form method="post" action="{% url 'hospital:update_appointment_status' appointment.id %}">
-                                {% csrf_token %}
-                                <input type="hidden" name="status" value="COMPLETED">
-                                <button class="action-btn btn-complete">Complete</button>
-                            </form>
-
-                            <form method="post" action="{% url 'hospital:update_appointment_status' appointment.id %}">
-                                {% csrf_token %}
-                                <input type="hidden" name="status" value="NO_SHOW">
-                                <button class="action-btn btn-noshow-action">No Show</button>
-                            </form>
-
-                            <a href="{% url 'hospital:create_follow_up' appointment.id %}" class="action-btn btn-follow">Follow-up</a>
                             {% endif %}
-                        </div>
-                    </td>
-                </tr>
-            {% endfor %}
-            </tbody>
-        </table>
-        {% else %}
-        <div class="empty-state">
-            <h3>📋 No appointments found</h3>
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                <a href="{% url 'hospital:patient_history' appointment.patient.id %}"
+                                    class="action-btn btn-history">History</a>
+
+                                {% if appointment.status == 'SCHEDULED' %}
+                                <a href="{% url 'hospital:add_medical_record' appointment.id %}?action=complete"
+                                    class="action-btn btn-complete">Complete</a>
+
+                                <form method="post"
+                                    action="{% url 'hospital:update_appointment_status' appointment.id %}">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="status" value="NO_SHOW">
+                                    <button class="action-btn btn-noshow-action">No Show</button>
+                                </form>
+
+                                <a href="{% url 'hospital:add_medical_record' appointment.id %}?action=followup"
+                                    class="action-btn btn-follow">Follow-up</a>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="empty-state">
+                <h3>📋 No appointments found</h3>
+            </div>
+            {% endif %}
         </div>
-        {% endif %}
-    </div>
-</main>
+    </main>
 
 </body>
+
 </html>

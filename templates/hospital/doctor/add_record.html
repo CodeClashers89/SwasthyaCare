@@ -314,11 +314,11 @@
             </div>
         </div>
 
-        <!-- FORM -->
         <div class="section-header">Medical Record Form</div>
         <div class="card">
             <form method="post" enctype="multipart/form-data">
                 {% csrf_token %}
+                <input type="hidden" name="action" value="{{ action }}">
 
                 <div class="form-group">
                     <label class="form-label">Diagnosis *</label>
@@ -426,10 +426,6 @@
 
                 <div class="actions">
                     <button type="submit" class="btn-success">Save Medical Record</button>
-                    {% if medical_record %}
-                    <a href="{% url 'hospital:download_medical_record_pdf' medical_record.id %}"
-                        class="btn btn-primary">Print Record</a>
-                    {% endif %}
                     <a href="{% url 'hospital:doctor_appointments' %}" class="btn-secondary">Cancel</a>
                 </div>
             </form>

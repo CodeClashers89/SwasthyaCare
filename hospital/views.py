@@ -152,6 +152,9 @@ def add_medical_record(request, appointment_id):
         messages.error(request, 'You can only add records for your own appointments.')
         return redirect('hospital:doctor_appointments')
     
+    # Get the action parameter (complete or followup)
+    action = request.GET.get('action', '')
+    
     if request.method == 'POST':
         form = MedicalRecordForm(request.POST, request.FILES)
         if form.is_valid():
@@ -161,8 +164,22 @@ def add_medical_record(request, appointment_id):
             medical_record.doctor = doctor
             medical_record.save()
             messages.success(request, 'Medical record added successfully.')
-            # Redirect to the same page with the record_id to show the Print button
-            return redirect('hospital:add_medical_record', appointment_id=appointment_id)
+            
+            # Check if we need to perform an action after saving
+            action = request.POST.get('action', '')
+            
+            if action == 'complete':
+                # Mark appointment as completed
+                appointment.status = 'COMPLETED'
+                appointment.save()
+                messages.success(request, 'Appointment marked as completed.')
+                return redirect('hospital:doctor_appointments')
+            elif action == 'followup':
+                # Redirect to follow-up creation page
+                return redirect('hospital:create_follow_up', appointment_id=appointment.id)
+            else:
+                # Default: redirect back to appointments
+                return redirect('hospital:doctor_appointments')
     else:
         form = MedicalRecordForm()
     
@@ -174,8 +191,10 @@ def add_medical_record(request, appointment_id):
         'appointment': appointment,
         'medical_record': existing_record,  # Pass existing record if available
         'doctor': doctor,  # Add doctor to context
+        'action': action,  # Pass action to template
     }
     return render(request, 'hospital/doctor/add_record.html', context)
+
 
 
 @login_required
@@ -221,6 +240,55 @@ def create_follow_up(request, appointment_id):
             follow_up.is_follow_up = True
             follow_up.parent_appointment = parent_appointment
             follow_up.created_by = request.user
+            
+            # Check doctor availability (both date-specific and recurring)
+            app_date = follow_up.appointment_date
+            app_time = follow_up.appointment_time
+            
+            # Check if appointment time is within hospital operating hours (9:00 AM to 8:00 PM)
+            hospital_open = time(9, 0)  # 9:00 AM
+            hospital_close = time(20, 0)  # 8:00 PM
+            
+            if app_time < hospital_open or app_time >= hospital_close:
+                messages.error(request, 'Appointments can only be made between 9:00 AM and 8:00 PM.')
+                return render(request, 'hospital/doctor/create_follow_up.html', 
+                            {'form': form, 'parent_appointment': parent_appointment})
+            
+            unavailable = DoctorAvailability.objects.filter(
+                Q(doctor=doctor, date=app_date, start_time__lte=app_time, end_time__gt=app_time) |
+                Q(doctor=doctor, is_recurring=True, start_time__lte=app_time, end_time__gt=app_time)
+            ).exists()
+            
+            if unavailable:
+                messages.error(request, 'Doctor is not available at this time.')
+                return render(request, 'hospital/doctor/create_follow_up.html', 
+                            {'form': form, 'parent_appointment': parent_appointment})
+            
+            # Check for slot conflicts (15-minute slots)
+            slot_start = get_slot_start(app_time)
+            if slot_start.minute == 0:
+                slot_end = time(slot_start.hour, 14)
+            elif slot_start.minute == 15:
+                slot_end = time(slot_start.hour, 29)
+            elif slot_start.minute == 30:
+                slot_end = time(slot_start.hour, 44)
+            else:  # minute == 45
+                slot_end = time(slot_start.hour, 59)
+            
+            # Check if there's already an appointment in this 15-minute slot
+            slot_conflict = Appointment.objects.filter(
+                doctor=doctor,
+                appointment_date=app_date,
+                appointment_time__gte=slot_start,
+                appointment_time__lte=slot_end,
+                status='SCHEDULED'
+            ).exists()
+            
+            if slot_conflict:
+                messages.error(request, f'This time slot ({slot_start.strftime("%H:%M")}-{slot_end.strftime("%H:%M")}) is already booked.')
+                return render(request, 'hospital/doctor/create_follow_up.html', 
+                            {'form': form, 'parent_appointment': parent_appointment})
+            
             follow_up.save()
             messages.success(request, 'Follow-up appointment created successfully.')
             return redirect('hospital:doctor_appointments')
@@ -448,6 +516,9 @@ def create_appointment(request):
     "14:00","14:15","14:30","14:45",
     "15:00","15:15","15:30","15:45",
     "16:00","16:15","16:30","16:45",
+    "17:00","17:15","17:30","17:45",
+    "18:00","18:15","18:30","18:45",
+    "19:00","19:15","19:30","19:45",
     ]
     if request.method == 'POST':
         form = AppointmentForm(request.POST,slots=slots)
@@ -458,6 +529,14 @@ def create_appointment(request):
             doctor = form.cleaned_data['doctor']
             appointment_date = form.cleaned_data['appointment_date']
             appointment_time = form.cleaned_data['appointment_time']
+
+            # Check if appointment time is within hospital operating hours (9:00 AM to 8:00 PM)
+            hospital_open = time(9, 0)  # 9:00 AM
+            hospital_close = time(20, 0)  # 8:00 PM
+            
+            if appointment_time < hospital_open or appointment_time >= hospital_close:
+                messages.error(request, 'Appointments can only be made between 9:00 AM and 8:00 PM.')
+                return render(request, 'hospital/receptionist/create_appointment.html', {'form': form})
 
             slot_start = get_slot_start(appointment_time)
 
@@ -488,12 +567,10 @@ def create_appointment(request):
             app_date = appointment.appointment_date
             app_time = appointment.appointment_time
             
-            # Check if doctor has marked this time as unavailable
+            # Check if doctor has marked this time as unavailable (both date-specific and recurring)
             unavailable = DoctorAvailability.objects.filter(
-                doctor=doctor,
-                date=app_date,
-                start_time__lte=app_time,
-                end_time__gt=app_time
+                Q(doctor=doctor, date=app_date, start_time__lte=app_time, end_time__gt=app_time) |
+                Q(doctor=doctor, is_recurring=True, start_time__lte=app_time, end_time__gt=app_time)
             ).exists()
             
             if unavailable:
@@ -534,20 +611,52 @@ def reschedule_appointment(request, appointment_id):
         if form.is_valid():
             updated_appointment = form.save(commit=False)
             
-            # Check availability
+            # Check availability (both date-specific and recurring)
             doctor = updated_appointment.doctor
             app_date = updated_appointment.appointment_date
             app_time = updated_appointment.appointment_time
             
+            # Check if appointment time is within hospital operating hours (9:00 AM to 8:00 PM)
+            hospital_open = time(9, 0)  # 9:00 AM
+            hospital_close = time(20, 0)  # 8:00 PM
+            
+            if app_time < hospital_open or app_time >= hospital_close:
+                messages.error(request, 'Appointments can only be made between 9:00 AM and 8:00 PM.')
+                return render(request, 'hospital/receptionist/reschedule_appointment.html', 
+                            {'form': form, 'appointment': appointment})
+            
             unavailable = DoctorAvailability.objects.filter(
-                doctor=doctor,
-                date=app_date,
-                start_time__lte=app_time,
-                end_time__gt=app_time
+                Q(doctor=doctor, date=app_date, start_time__lte=app_time, end_time__gt=app_time) |
+                Q(doctor=doctor, is_recurring=True, start_time__lte=app_time, end_time__gt=app_time)
             ).exists()
             
             if unavailable:
                 messages.error(request, 'Doctor is not available at this time.')
+                return render(request, 'hospital/receptionist/reschedule_appointment.html', 
+                            {'form': form, 'appointment': appointment})
+            
+            # Check for slot conflicts (15-minute slots)
+            slot_start = get_slot_start(app_time)
+            if slot_start.minute == 0:
+                slot_end = time(slot_start.hour, 14)
+            elif slot_start.minute == 15:
+                slot_end = time(slot_start.hour, 29)
+            elif slot_start.minute == 30:
+                slot_end = time(slot_start.hour, 44)
+            else:  # minute == 45
+                slot_end = time(slot_start.hour, 59)
+            
+            # Check if there's already an appointment in this 15-minute slot (excluding current appointment)
+            slot_conflict = Appointment.objects.filter(
+                doctor=doctor,
+                appointment_date=app_date,
+                appointment_time__gte=slot_start,
+                appointment_time__lte=slot_end,
+                status='SCHEDULED'
+            ).exclude(id=appointment.id).exists()
+            
+            if slot_conflict:
+                messages.error(request, f'This time slot ({slot_start.strftime("%H:%M")}-{slot_end.strftime("%H:%M")}) is already booked.')
                 return render(request, 'hospital/receptionist/reschedule_appointment.html', 
                             {'form': form, 'appointment': appointment})
             
@@ -761,14 +870,63 @@ def bulk_reschedule_appointments(request, surgery_id):
                 doctor=doctor
             )
             if form.is_valid():
+                new_date = form.cleaned_data['new_date']
+                new_time = form.cleaned_data['new_time']
+                
+                # Check if appointment time is within hospital operating hours (9:00 AM to 8:00 PM)
+                hospital_open = time(9, 0)
+                hospital_close = time(20, 0)
+                
+                if new_time < hospital_open or new_time >= hospital_close:
+                    all_valid = False
+                    messages.error(request, f'Error with appointment for {appointment.patient.user.get_full_name()}: Appointments can only be made between 9:00 AM and 8:00 PM.')
+                    continue
+                
+                # Check doctor availability (both date-specific and recurring)
+                unavailable = DoctorAvailability.objects.filter(
+                    Q(doctor=doctor, date=new_date, start_time__lte=new_time, end_time__gt=new_time) |
+                    Q(doctor=doctor, is_recurring=True, start_time__lte=new_time, end_time__gt=new_time)
+                ).exists()
+                
+                if unavailable:
+                    all_valid = False
+                    messages.error(request, f'Error with appointment for {appointment.patient.user.get_full_name()}: Doctor is not available at {new_time.strftime("%H:%M")} on {new_date}.')
+                    continue
+                
+                # Check for slot conflicts (15-minute slots)
+                slot_start = get_slot_start(new_time)
+                if slot_start.minute == 0:
+                    slot_end = time(slot_start.hour, 14)
+                elif slot_start.minute == 15:
+                    slot_end = time(slot_start.hour, 29)
+                elif slot_start.minute == 30:
+                    slot_end = time(slot_start.hour, 44)
+                else:  # minute == 45
+                    slot_end = time(slot_start.hour, 59)
+                
+                # Check if there's already an appointment in this 15-minute slot (excluding current appointment)
+                slot_conflict = Appointment.objects.filter(
+                    doctor=doctor,
+                    appointment_date=new_date,
+                    appointment_time__gte=slot_start,
+                    appointment_time__lte=slot_end,
+                    status='SCHEDULED'
+                ).exclude(id=appointment.id).exists()
+                
+                if slot_conflict:
+                    all_valid = False
+                    messages.error(request, f'Error with appointment for {appointment.patient.user.get_full_name()}: Time slot ({slot_start.strftime("%H:%M")}-{slot_end.strftime("%H:%M")}) is already booked.')
+                    continue
+                
                 reschedule_data.append({
                     'appointment': appointment,
-                    'new_date': form.cleaned_data['new_date'],
-                    'new_time': form.cleaned_data['new_time']
+                    'new_date': new_date,
+                    'new_time': new_time
                 })
             else:
                 all_valid = False
                 messages.error(request, f'Error with appointment for {appointment.patient.user.get_full_name()}: {form.errors}')
+
         
         if all_valid:
             # Process all rescheduling
