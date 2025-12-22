@@ -1,80 +1,345 @@
-{% extends 'base.html' %}
+<!DOCTYPE html>
+<html lang="en">
 
-{% block title %}Reschedule Appointment - SwasthyaCare{% endblock %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reschedule Appointment - SwasthyaCare</title>
 
-{% block content %}
-<div class="page-header">
-    <h1 class="page-title">Reschedule Appointment</h1>
-    <p class="page-subtitle">Change appointment date and time</p>
-</div>
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-<div class="card">
-    <div class="card-header">Current Appointment Details</div>
-    <div class="card-body">
-        <ul class="info-list">
-            <li>
-                <span class="info-label">Patient</span>
-                <span class="info-value">{{ appointment.patient.patient_id }} - {{
-                    appointment.patient.user.get_full_name }}</span>
-            </li>
-            <li>
-                <span class="info-label">Doctor</span>
-                <span class="info-value">Dr. {{ appointment.doctor.user.get_full_name }} ({{
-                    appointment.doctor.specialization }})</span>
-            </li>
-            <li>
-                <span class="info-label">Current Date & Time</span>
-                <span class="info-value">{{ appointment.appointment_date }} at {{ appointment.appointment_time|time:"h:i
-                    A" }}</span>
-            </li>
-            <li>
-                <span class="info-label">Reason</span>
-                <span class="info-value">{{ appointment.reason }}</span>
-            </li>
-        </ul>
+    <style>
+        :root {
+            --primary-color: #66cdaa;
+            --primary-dark: #3cb371;
+            --text-primary: #333;
+            --text-secondary: #666;
+            --border-color: #e0e0e0;
+            --bg-body: #f8f9fa;
+            --bg-card: #ffffff;
+            --warning-color: #66cdaa;
+            --warning-light: #fff3cd;
+            --danger-color: #dc3545;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-primary);
+            width: 100vw;
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+            padding: 0 1rem 2rem;
+            margin: 0 auto;
+        }
+
+        .page-header {
+            margin-bottom: 2rem;
+        }
+
+        .page-title {
+            font-size: 1.75rem;
+            font-weight: 600;
+        }
+
+        .page-subtitle {
+            color: var(--text-secondary);
+        }
+
+        .card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+        }
+
+        .card-header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 1rem 1.5rem;
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+
+        .card-body {
+            padding: 2rem;
+        }
+
+        .info-list {
+            list-style: none;
+        }
+
+        /* NAVBAR */
+        .navbar {
+            width: 100vw;
+            background: #64cbab;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 50px;
+            color: #fff;
+            margin: 0;
+        }
+
+        .navbar-brand {
+            font-size: 28px;
+            font-weight: 600
+        }
+
+        .navbar-center {
+            display: flex;
+            gap: 40px
+        }
+
+        .navbar-center a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500
+        }
+
+        .navbar-right {
+            display: flex;
+            gap: 15px;
+            align-items: center
+        }
+
+        .btn-logout {
+            background: #ef4444;
+            padding: 8px 18px;
+            border-radius: 8px;
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .info-list li {
+            padding: 1rem 0;
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .info-list li:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .info-value {
+            font-weight: 600;
+        }
+
+        .grid {
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        .grid-2 {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        @media (max-width: 640px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+
+            .info-list li {
+                flex-direction: column;
+                gap: 0.25rem;
+            }
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-label {
+            margin-bottom: 0.5rem;
+            display: block;
+            font-weight: 500;
+        }
+
+        input[type="date"],
+        input[type="time"] {
+            width: 100%;
+            padding: 0.75rem;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+        }
+
+        .alert-warning {
+            background-color: var(--warning-light);
+            border: 1px solid #ffeeba;
+            color: #856404;
+        }
+
+        .alert-error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        .flex-gap {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            text-decoration: none;
+        }
+
+        .btn-warning {
+            background-color: var(--warning-color);
+            color: white;
+        }
+
+        .btn-secondary {
+            background-color: #e2e8f0;
+            color: #333;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="navbar-brand">SwasthyaCare</div>
+        <div class="navbar-center">
+            <a href="#">Dashboard</a>
+            <a href="{% url 'hospital:register_patient' %}">Register Patient</a>
+            <a href="{% url 'hospital:create_appointment' %}">New Appointment</a>
+            <a href="{% url 'hospital:receptionist_appointments' %}">All Appointments</a>
+        </div>
+        <div class="navbar-right">
+            <span>{{ user.get_full_name }}</span>
+            <a href="{% url 'hospital:logout' %}" class="btn-logout">Logout</a>
+        </div>
+    </nav>
+
+    <div class="container">
+
+        <!-- Header -->
+        <div class="page-header">
+            <h1 class="page-title">Reschedule Appointment</h1>
+            <p class="page-subtitle">Change appointment date and time</p>
+        </div>
+
+        <!-- Current Appointment -->
+        <div class="card">
+            <div class="card-header">Current Appointment Details</div>
+            <div class="card-body">
+                <ul class="info-list">
+                    <li>
+                        <span class="info-label">Patient</span>
+                        <span class="info-value">
+                            {{ appointment.patient.patient_id }} - {{ appointment.patient.user.get_full_name }}
+                        </span>
+                    </li>
+                    <li>
+                        <span class="info-label">Doctor</span>
+                        <span class="info-value">
+                            Dr. {{ appointment.doctor.user.get_full_name }} ({{ appointment.doctor.specialization }})
+                        </span>
+                    </li>
+                    <li>
+                        <span class="info-label">Current Date & Time</span>
+                        <span class="info-value">
+                            {{ appointment.appointment_date }} at {{ appointment.appointment_time|time:"h:i A" }}
+                        </span>
+                    </li>
+                    <li>
+                        <span class="info-label">Reason</span>
+                        <span class="info-value">{{ appointment.reason }}</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Reschedule Form -->
+        <div class="card">
+            <div class="card-header">Reschedule Form</div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+
+                    <div class="grid grid-2">
+                        <div class="form-group">
+                            <label class="form-label">New Appointment Date *</label>
+                            {{ form.appointment_date }}
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">New Appointment Time *</label>
+                            {{ form.appointment_time }}
+                        </div>
+                    </div>
+
+                    {% if form.errors %}
+                    <div class="alert alert-error">
+                        <strong>Error:</strong>
+                        {% for field, errors in form.errors.items %}
+                        {% for error in errors %}
+                        <p>{{ error }}</p>
+                        {% endfor %}
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    <div class="alert alert-warning">
+                        <strong>Important:</strong> Make sure to check doctor availability before rescheduling.
+                    </div>
+
+                    <div class="flex-gap">
+                        <button type="submit" class="btn btn-warning">
+                            Reschedule Appointment
+                        </button>
+                        <a href="{% url 'hospital:receptionist_appointments' %}" class="btn btn-secondary">
+                            Cancel
+                        </a>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+
     </div>
-</div>
+</body>
 
-<div class="card mt-3">
-    <div class="card-header">Reschedule Form</div>
-    <div class="card-body">
-        <form method="post">
-            {% csrf_token %}
-
-            <div class="grid grid-2">
-                <div class="form-group">
-                    <label for="{{ form.appointment_date.id_for_label }}" class="form-label">New Appointment Date
-                        *</label>
-                    {{ form.appointment_date }}
-                </div>
-
-                <div class="form-group">
-                    <label for="{{ form.appointment_time.id_for_label }}" class="form-label">New Appointment Time
-                        *</label>
-                    {{ form.appointment_time }}
-                </div>
-            </div>
-
-            {% if form.errors %}
-            <div class="alert alert-error">
-                <strong>Error:</strong>
-                {% for field, errors in form.errors.items %}
-                {% for error in errors %}
-                <p>{{ error }}</p>
-                {% endfor %}
-                {% endfor %}
-            </div>
-            {% endif %}
-
-            <div class="alert alert-warning">
-                <strong>Important:</strong> Make sure to check doctor availability before rescheduling.
-            </div>
-
-            <div class="flex-gap mt-3">
-                <button type="submit" class="btn btn-warning btn-lg">Reschedule Appointment</button>
-                <a href="{% url 'hospital:receptionist_appointments' %}" class="btn btn-secondary">Cancel</a>
-            </div>
-        </form>
-    </div>
-</div>
-{% endblock %}
+</html>
