@@ -3,54 +3,272 @@
 {% block title %}Notifications - SwasthyaCare{% endblock %}
 
 {% block content %}
-<div class="page-header">
-    <h1 class="page-title">Notifications</h1>
-    <p class="page-subtitle">Your recent notifications</p>
-</div>
+<!DOCTYPE html>
+<html lang="en">
 
-<div class="card">
-    <div class="card-header">All Notifications</div>
-    <div class="card-body">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notifications - SwasthyaCare</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', 'Inter', sans-serif;
+            background: linear-gradient(to bottom, #d4f4e7 0%, #e8f8f1 100%);
+            min-height: 100vh;
+        }
+
+        .header {
+            background-color: #64cbab;
+            height: 80px;
+            padding: 0 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background-color: white;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .logo {
+            color: white;
+            font-size: 22px;
+            font-weight: 700;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 35px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: 500;
+            padding: 8px 12px;
+            border-radius: 5px;
+        }
+
+        .nav-links a:hover {
+            background-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .user-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-info {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 15px;
+        }
+
+        .logout-btn {
+            background-color: #ef4444;
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .main-content {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 40px;
+        }
+
+        .page-header h1 {
+            font-size: 36px;
+            color: #1e293b;
+            margin-bottom: 8px;
+        }
+
+        .page-subtitle {
+            color: #64748b;
+            margin-bottom: 30px;
+        }
+
+        .notifications-container {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 15px;
+        }
+
+        .notification-item {
+            padding: 20px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+        }
+
+        .notification-item.unread {
+            background-color: #f0f8ff;
+            border-left: 4px solid #5dbc9d;
+        }
+
+        .notification-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .notification-message {
+            font-size: 14px;
+            color: #64748b;
+            margin-bottom: 8px;
+        }
+
+        .notification-timestamp {
+            font-size: 13px;
+            color: #94a3b8;
+        }
+
+        .review-btn {
+            background-color: #9ac2ea;
+            color: white;
+            border: none;
+            padding: 8px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #64748b;
+        }
+
+        .back-btn {
+            margin-top: 30px;
+            background-color: #6c757d;
+            color: white;
+            padding: 12px 40px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+
+<header class="header">
+    <div class="logo-section">
+        
+        <div class="logo">SwasthyaCare</div>
+    </div>
+
+    <nav class="nav-links">
+        <a href="#">Dashboard</a>
+        <a href="#">Appointments</a>
+        <a href="#">Surgeries</a>
+        <a href="#">Availability</a>
+    </nav>
+
+    <div class="user-section">
+        <span class="user-info">{{ request.user.get_full_name }} (Doctor)</span>
+        <a href="{% url 'logout' %}">
+            <button class="logout-btn">Logout</button>
+        </a>
+    </div>
+</header>
+
+<main class="main-content">
+    <div class="page-header">
+        <h1>Notifications</h1>
+        <p class="page-subtitle">Your recent notifications</p>
+    </div>
+
+    <div class="notifications-container">
+        <h2 class="section-title">All Notifications</h2>
+
         {% if notifications %}
-        <ul class="info-list">
             {% for notification in notifications %}
-            <li
-                style="{% if not notification.is_read %}background-color: #f0f8ff; border-left: 3px solid var(--primary-color);{% endif %} padding: 15px; margin-bottom: 10px; border-radius: 8px;">
-                <div style="display: flex; justify-content: space-between; align-items: start;">
-                    <div style="flex: 1;">
-                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px;">
-                            <strong style="font-size: 1.1em;">{{ notification.title }}</strong>
-                            {% if not notification.is_read %}
-                            <span class="badge badge-primary">New</span>
-                            {% endif %}
-                        </div>
-                        <p style="margin: 8px 0; color: var(--text-primary);">{{ notification.message }}</p>
-                        <small style="color: var(--text-secondary);">
-                            {{ notification.created_at|date:"M d, Y h:i A" }}
-                        </small>
+            <div class="notification-item {% if not notification.is_read %}unread{% endif %}">
+                <div style="flex:1;">
+                    <div class="notification-title">
+                        {{ notification.title }}
+                        {% if not notification.is_read %}
+                        <span style="color:#0d6efd;font-size:13px;">(New)</span>
+                        {% endif %}
                     </div>
-                    <div>
-                        {% if notification.related_surgery %}
-                        {% if notification.notification_type == 'SURGERY_APPROVAL_PENDING' %}
-                        <a href="{% url 'hospital:approve_surgery' notification.related_surgery.id %}"
-                            class="btn btn-sm btn-primary">Review</a>
-                        {% endif %}
-                        {% endif %}
+
+                    <div class="notification-message">
+                        {{ notification.message }}
+                    </div>
+
+                    <div class="notification-timestamp">
+                        {{ notification.created_at|date:"M d, Y h:i A" }}
                     </div>
                 </div>
-            </li>
+
+                {% if notification.related_surgery %}
+                    {% if notification.notification_type == 'SURGERY_APPROVAL_PENDING' %}
+                    <a href="{% url 'hospital:approve_surgery' notification.related_surgery.id %}">
+                        <button class="review-btn">Review</button>
+                    </a>
+                    {% endif %}
+                {% endif %}
+            </div>
             {% endfor %}
-        </ul>
         {% else %}
-        <div class="empty-state">
-            <div class="empty-state-icon">🔔</div>
-            <p class="empty-state-text">No notifications</p>
-        </div>
+            <div class="empty-state">
+                <div style="font-size:40px;"></div>
+                <p>No notifications</p>
+            </div>
         {% endif %}
     </div>
-</div>
 
-<div class="mt-3">
-    <a href="javascript:history.back()" class="btn btn-secondary">Back</a>
-</div>
+    <div style="text-align:center;">
+        <button class="back-btn" onclick="history.back()">← Back</button>
+    </div>
+</main>
+
+</body>
+</html>
 {% endblock %}
