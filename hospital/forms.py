@@ -293,8 +293,9 @@ class AppointmentRescheduleFormSingle(forms.Form):
         return cleaned_data
 
 
-class DoctorRegistrationForm(forms.ModelForm):
+class DoctorRegistrationForm(forms.Form):
     """Form for creating doctor users by admin"""
+    # User fields
     first_name = forms.CharField(max_length=100, required=True)
     last_name = forms.CharField(max_length=100, required=True)
     email = forms.EmailField(required=True)
@@ -307,10 +308,6 @@ class DoctorRegistrationForm(forms.ModelForm):
     qualification = forms.CharField(max_length=200, required=True)
     experience_years = forms.IntegerField(min_value=0, required=True)
     consultation_fee = forms.DecimalField(max_digits=10, decimal_places=2, required=True)
-    
-    class Meta:
-        model = Doctor
-        fields = ['specialization', 'qualification', 'experience_years', 'consultation_fee']
     
     def save(self, commit=True):
         # Create user first
@@ -325,10 +322,13 @@ class DoctorRegistrationForm(forms.ModelForm):
         )
         
         # Create doctor profile
-        doctor = super().save(commit=False)
-        doctor.user = user
-        if commit:
-            doctor.save()
+        doctor = Doctor.objects.create(
+            user=user,
+            specialization=self.cleaned_data['specialization'],
+            qualification=self.cleaned_data['qualification'],
+            experience_years=self.cleaned_data['experience_years'],
+            consultation_fee=self.cleaned_data['consultation_fee']
+        )
         return doctor
 
 
