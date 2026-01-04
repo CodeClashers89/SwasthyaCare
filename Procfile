@@ -1,1 +1,1 @@
-web: gunicorn SwasthyaCare.wsgi --timeout 120
+web: gunicorn SwasthyaCare.wsgi --log-file -
