@@ -1,1 +1,1 @@
-web: gunicorn swasthyacare.wsgi --log-file -
+web: gunicorn swasthyacare.wsgi 
