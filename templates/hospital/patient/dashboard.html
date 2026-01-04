@@ -238,6 +238,7 @@
             margin-top: 35px;
         }
 
+
         /* ===== RESPONSIVE ===== */
         @media (max-width: 1200px) {
             .main-content {
@@ -250,7 +251,352 @@
                 grid-template-columns: 1fr;
             }
         }
+
+        /* ===== CHATBOT STYLES ===== */
+        .chatbot-button {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: #64cbab;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(100, 203, 171, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .chatbot-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 30px rgba(100, 203, 171, 0.6);
+            background: #50b595;
+        }
+
+        .chatbot-button svg {
+            width: 30px;
+            height: 30px;
+            fill: white;
+        }
+
+        .chatbot-container {
+            position: fixed;
+            bottom: 100px;
+            right: 30px;
+            width: 400px;
+            height: 600px;
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.15);
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            z-index: 999;
+            animation: slideUp 0.3s ease;
+            border: 1px solid #e0e0e0;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .chatbot-container.active {
+            display: flex;
+        }
+
+        .chatbot-header {
+            background: #64cbab;
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chatbot-header h3 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .chatbot-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s;
+        }
+
+        .chatbot-close:hover {
+            transform: rotate(90deg);
+        }
+
+        .chatbot-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            background-color: #f8fcfb;
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 12px 16px;
+            border-radius: 16px;
+            line-height: 1.5;
+            font-size: 14px;
+            animation: fadeIn 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.user {
+            background: #64cbab;
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+        }
+
+        .message.bot {
+            background: white;
+            color: #333;
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .quick-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .quick-action-btn {
+            background: white;
+            border: 1px solid #64cbab;
+            color: #64cbab;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .quick-action-btn:hover {
+            background: #64cbab;
+            color: white;
+        }
+
+        .appointment-card,
+        .doctor-card {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 12px;
+            margin-top: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .appointment-card h4,
+        .doctor-card h4 {
+            margin: 0 0 8px 0;
+            font-size: 14px;
+            color: #64cbab;
+        }
+
+        .appointment-card p,
+        .doctor-card p {
+            margin: 4px 0;
+            font-size: 13px;
+            color: #555;
+        }
+
+        .doctor-select-btn,
+        .time-slot-btn {
+            background: #64cbab;
+            color: white;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-top: 8px;
+            transition: all 0.2s ease;
+            font-weight: 500;
+        }
+
+        .doctor-select-btn:hover,
+        .time-slot-btn:hover {
+            background: #50b595;
+            transform: translateY(-1px);
+        }
+
+        .time-slots {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .time-slot-btn {
+            margin: 0;
+            padding: 8px;
+            font-size: 11px;
+            text-align: center;
+        }
+
+        .typing-indicator {
+            display: flex;
+            gap: 4px;
+            padding: 12px 16px;
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 16px;
+            width: fit-content;
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+        }
+
+        .typing-indicator span {
+            width: 8px;
+            height: 8px;
+            background: #64cbab;
+            border-radius: 50%;
+            animation: typing 1.4s infinite;
+            opacity: 0.6;
+        }
+
+        .typing-indicator span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-indicator span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing {
+
+            0%,
+            60%,
+            100% {
+                transform: translateY(0);
+            }
+
+            30% {
+                transform: translateY(-6px);
+            }
+        }
+
+        .chatbot-input-area {
+            padding: 15px;
+            background: white;
+            border-top: 1px solid #f0f0f0;
+            display: flex;
+            gap: 10px;
+        }
+
+        .chatbot-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #f0f0f0;
+            border-radius: 25px;
+            font-size: 14px;
+            font-family: 'Poppins', sans-serif;
+            outline: none;
+            transition: all 0.2s ease;
+            background: #f9f9f9;
+        }
+
+        .chatbot-input:focus {
+            border-color: #64cbab;
+            background: white;
+        }
+
+        .chatbot-send {
+            background: #64cbab;
+            border: none;
+            color: white;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 10px rgba(100, 203, 171, 0.3);
+        }
+
+        .chatbot-send:hover {
+            transform: scale(1.05);
+            background: #50b595;
+        }
+
+        .chatbot-send svg {
+            width: 20px;
+            height: 20px;
+            fill: white;
+        }
+
+        .date-input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-family: 'Poppins', sans-serif;
+            margin-top: 10px;
+        }
+
+        .date-input:focus {
+            outline: none;
+            border-color: #64cbab;
+        }
+
+        @media (max-width: 768px) {
+            .chatbot-container {
+                width: calc(100vw - 40px);
+                right: 20px;
+                bottom: 90px;
+                height: 500px;
+            }
+        }
     </style>
+
 </head>
 
 <body>
@@ -376,6 +722,387 @@
 
         </main>
     </div>
+
+    <!-- CHATBOT -->
+    <button class="chatbot-button" id="chatbotButton">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z" />
+        </svg>
+    </button>
+
+    <div class="chatbot-container" id="chatbotContainer">
+        <div class="chatbot-header">
+            <h3>Healthcare Assistant</h3>
+            <button class="chatbot-close" id="chatbotClose">&times;</button>
+        </div>
+        <div class="chatbot-messages" id="chatbotMessages"></div>
+        <div class="chatbot-input-area">
+            <input type="text" class="chatbot-input" id="chatbotInput" placeholder="Type your message...">
+            <button class="chatbot-send" id="chatbotSend">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                    <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Chatbot functionality
+        const chatbotButton = document.getElementById('chatbotButton');
+        const chatbotContainer = document.getElementById('chatbotContainer');
+        const chatbotClose = document.getElementById('chatbotClose');
+        const chatbotMessages = document.getElementById('chatbotMessages');
+        const chatbotInput = document.getElementById('chatbotInput');
+        const chatbotSend = document.getElementById('chatbotSend');
+
+        let bookingState = {
+            step: null,
+            doctor: null,
+            date: null,
+            time: null
+        };
+
+        // Get CSRF token
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        const csrftoken = getCookie('csrftoken');
+
+        // Toggle chatbot
+        chatbotButton.addEventListener('click', () => {
+            chatbotContainer.classList.add('active');
+            if (chatbotMessages.children.length === 0) {
+                sendMessage('hi', true);
+            }
+        });
+
+        chatbotClose.addEventListener('click', () => {
+            chatbotContainer.classList.remove('active');
+        });
+
+        // Send message on button click
+        chatbotSend.addEventListener('click', () => {
+            const message = chatbotInput.value.trim();
+            if (message) {
+                sendMessage(message);
+                chatbotInput.value = '';
+            }
+        });
+
+        // Send message on Enter key
+        chatbotInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                const message = chatbotInput.value.trim();
+                if (message) {
+                    sendMessage(message);
+                    chatbotInput.value = '';
+                }
+            }
+        });
+
+        // Add message to chat
+        function addMessage(text, isUser = false) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user' : 'bot'}`;
+            messageDiv.textContent = text;
+            chatbotMessages.appendChild(messageDiv);
+            scrollToBottom();
+        }
+
+        // Add typing indicator
+        function showTyping() {
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'typing-indicator';
+            typingDiv.id = 'typing';
+            typingDiv.innerHTML = '<span></span><span></span><span></span>';
+            chatbotMessages.appendChild(typingDiv);
+            scrollToBottom();
+        }
+
+        function hideTyping() {
+            const typing = document.getElementById('typing');
+            if (typing) typing.remove();
+        }
+
+        // Scroll to bottom
+        function scrollToBottom() {
+            chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+        }
+
+        // Send message to backend
+        async function sendMessage(message, isInitial = false) {
+            if (!isInitial) {
+                addMessage(message, true);
+            }
+
+            showTyping();
+
+            try {
+                const response = await fetch('/api/chatbot/message/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrftoken
+                    },
+                    body: JSON.stringify({ message })
+                });
+
+                const data = await response.json();
+                hideTyping();
+
+                if (data.success) {
+                    handleResponse(data);
+                } else {
+                    addMessage(data.message || 'Sorry, something went wrong.');
+                }
+            } catch (error) {
+                hideTyping();
+                addMessage('Sorry, I encountered an error. Please try again.');
+                console.error('Error:', error);
+            }
+        }
+
+        // Handle bot response
+        function handleResponse(data) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message bot';
+
+            if (data.type === 'appointments') {
+                messageDiv.innerHTML = `<strong>${data.message}</strong>`;
+                chatbotMessages.appendChild(messageDiv);
+
+                if (data.upcoming && data.upcoming.length > 0) {
+                    const upcomingDiv = document.createElement('div');
+                    upcomingDiv.className = 'message bot';
+                    upcomingDiv.innerHTML = '<strong>📅 Upcoming Appointments:</strong>';
+                    chatbotMessages.appendChild(upcomingDiv);
+
+                    data.upcoming.forEach(apt => {
+                        const aptCard = document.createElement('div');
+                        aptCard.className = 'appointment-card';
+                        aptCard.innerHTML = `
+                            <h4>${apt.doctor}</h4>
+                            <p><strong>Date:</strong> ${apt.date}</p>
+                            <p><strong>Time:</strong> ${apt.time}</p>
+                            <p><strong>Reason:</strong> ${apt.reason}</p>
+                            <p><strong>Status:</strong> ${apt.status}</p>
+                        `;
+                        chatbotMessages.appendChild(aptCard);
+                    });
+                }
+
+                if (data.past && data.past.length > 0) {
+                    const pastDiv = document.createElement('div');
+                    pastDiv.className = 'message bot';
+                    pastDiv.innerHTML = '<strong>📋 Past Appointments:</strong>';
+                    chatbotMessages.appendChild(pastDiv);
+
+                    data.past.slice(0, 3).forEach(apt => {
+                        const aptCard = document.createElement('div');
+                        aptCard.className = 'appointment-card';
+                        aptCard.innerHTML = `
+                            <h4>${apt.doctor}</h4>
+                            <p><strong>Date:</strong> ${apt.date}</p>
+                            <p><strong>Time:</strong> ${apt.time}</p>
+                            <p><strong>Status:</strong> ${apt.status}</p>
+                        `;
+                        chatbotMessages.appendChild(aptCard);
+                    });
+                }
+            } else if (data.type === 'doctors') {
+                messageDiv.innerHTML = `<strong>${data.message}</strong>`;
+                chatbotMessages.appendChild(messageDiv);
+
+                data.doctors.forEach(doctor => {
+                    const doctorCard = document.createElement('div');
+                    doctorCard.className = 'doctor-card';
+                    doctorCard.innerHTML = `
+                        <h4>${doctor.name}</h4>
+                        <p><strong>Specialization:</strong> ${doctor.specialization}</p>
+                        <p><strong>Experience:</strong> ${doctor.experience}</p>
+                        <p><strong>Consultation Fee:</strong> ${doctor.fee}</p>
+                        <button class="doctor-select-btn" onclick="selectDoctor(${doctor.id}, '${doctor.name}')">
+                            Book Appointment
+                        </button>
+                    `;
+                    chatbotMessages.appendChild(doctorCard);
+                });
+            } else if (data.type === 'availability_prompt') {
+                messageDiv.innerHTML = `<strong>${data.message}</strong>`;
+                chatbotMessages.appendChild(messageDiv);
+
+                data.doctors.forEach(doctor => {
+                    const doctorCard = document.createElement('div');
+                    doctorCard.className = 'doctor-card';
+                    doctorCard.innerHTML = `
+                        <h4>${doctor.name}</h4>
+                        <p><strong>Specialization:</strong> ${doctor.specialization}</p>
+                        <button class="doctor-select-btn" onclick="selectDoctor(${doctor.id}, '${doctor.name}')">
+                            Check Availability
+                        </button>
+                    `;
+                    chatbotMessages.appendChild(doctorCard);
+                });
+            } else if (data.type === 'availability') {
+                messageDiv.innerHTML = `<strong>Available slots for ${data.doctor} on ${data.date}:</strong>`;
+                chatbotMessages.appendChild(messageDiv);
+
+                if (data.available_slots.length > 0) {
+                    const slotsDiv = document.createElement('div');
+                    slotsDiv.className = 'time-slots';
+                    data.available_slots.forEach(slot => {
+                        const slotBtn = document.createElement('button');
+                        slotBtn.className = 'time-slot-btn';
+                        slotBtn.textContent = slot.time;
+                        slotBtn.onclick = () => selectTimeSlot(slot.value);
+                        slotsDiv.appendChild(slotBtn);
+                    });
+                    chatbotMessages.appendChild(slotsDiv);
+                } else {
+                    const noSlotsDiv = document.createElement('div');
+                    noSlotsDiv.className = 'message bot';
+                    noSlotsDiv.textContent = 'No available slots for this date. Please try another date.';
+                    chatbotMessages.appendChild(noSlotsDiv);
+                }
+            } else if (data.type === 'booking_success') {
+                messageDiv.innerHTML = `<strong>✅ ${data.message}</strong>`;
+                chatbotMessages.appendChild(messageDiv);
+                bookingState = { step: null, doctor: null, date: null, time: null };
+            } else {
+                messageDiv.textContent = data.message;
+                chatbotMessages.appendChild(messageDiv);
+            }
+
+            // Add quick actions if available
+            if (data.quick_actions) {
+                const actionsDiv = document.createElement('div');
+                actionsDiv.className = 'quick-actions';
+                data.quick_actions.forEach(action => {
+                    const btn = document.createElement('button');
+                    btn.className = 'quick-action-btn';
+                    btn.textContent = action.label;
+                    btn.onclick = () => sendMessage(action.action);
+                    actionsDiv.appendChild(btn);
+                });
+                chatbotMessages.appendChild(actionsDiv);
+            }
+
+            scrollToBottom();
+        }
+
+        // Select doctor for booking
+        async function selectDoctor(doctorId, doctorName) {
+            bookingState.doctor = doctorId;
+            addMessage(`Selected: ${doctorName}`, true);
+
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message bot';
+            messageDiv.innerHTML = `<strong>Please select a date for your appointment:</strong>`;
+            chatbotMessages.appendChild(messageDiv);
+
+            const dateInputDiv = document.createElement('div');
+            dateInputDiv.className = 'message bot';
+            const today = new Date().toISOString().split('T')[0];
+            dateInputDiv.innerHTML = `
+                <input type="date" class="date-input" id="appointmentDate" min="${today}">
+                <button class="doctor-select-btn" style="width: 100%; margin-top: 10px;" onclick="checkAvailability()">
+                    Check Availability
+                </button>
+            `;
+            chatbotMessages.appendChild(dateInputDiv);
+            scrollToBottom();
+        }
+
+        // Check availability for selected date
+        async function checkAvailability() {
+            const dateInput = document.getElementById('appointmentDate');
+            const date = dateInput.value;
+
+            if (!date) {
+                alert('Please select a date');
+                return;
+            }
+
+            bookingState.date = date;
+            addMessage(`Checking availability for ${date}...`, true);
+            showTyping();
+
+            try {
+                const response = await fetch('/api/chatbot/check-availability/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrftoken
+                    },
+                    body: JSON.stringify({
+                        doctor_id: bookingState.doctor,
+                        date: date
+                    })
+                });
+
+                const data = await response.json();
+                hideTyping();
+
+                if (data.success) {
+                    handleResponse(data);
+                } else {
+                    addMessage(data.message || 'Error checking availability');
+                }
+            } catch (error) {
+                hideTyping();
+                addMessage('Error checking availability. Please try again.');
+                console.error('Error:', error);
+            }
+        }
+
+        // Select time slot
+        async function selectTimeSlot(time) {
+            bookingState.time = time;
+            addMessage(`Selected time: ${time}`, true);
+            showTyping();
+
+            try {
+                const response = await fetch('/api/chatbot/book-appointment/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrftoken
+                    },
+                    body: JSON.stringify({
+                        doctor_id: bookingState.doctor,
+                        date: bookingState.date,
+                        time: time,
+                        reason: 'Consultation via chatbot'
+                    })
+                });
+
+                const data = await response.json();
+                hideTyping();
+
+                if (data.success) {
+                    handleResponse(data);
+                } else {
+                    addMessage(data.message || 'Error booking appointment');
+                }
+            } catch (error) {
+                hideTyping();
+                addMessage('Error booking appointment. Please try again.');
+                console.error('Error:', error);
+            }
+        }
+    </script>
 
 </body>
 

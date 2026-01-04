@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from . import api_views
 
 app_name = 'hospital'
 
@@ -52,4 +53,9 @@ urlpatterns = [
     path('panel/create-doctor/', views.create_doctor, name='create_doctor'),
     path('panel/create-receptionist/', views.create_receptionist, name='create_receptionist'),
     path('panel/delete-user/<int:user_id>/', views.delete_user, name='delete_user'),
+    
+    # Chatbot API URLs
+    path('api/chatbot/message/', api_views.chatbot_message, name='chatbot_message'),
+    path('api/chatbot/check-availability/', api_views.check_doctor_availability_api, name='chatbot_check_availability'),
+    path('api/chatbot/book-appointment/', api_views.book_appointment_api, name='chatbot_book_appointment'),
 ]
